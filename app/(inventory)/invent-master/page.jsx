@@ -1,6 +1,5 @@
-import { createInventMaster } from "../action/action";
+import { createInventMaster } from "../../action/action";
 import prisma from "../../utils/connection";
-import { revalidatePath } from "next/cache";
 
 export default async function InventForm() {
   const coaList = await prisma?.COA.findMany();

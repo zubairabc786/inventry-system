@@ -1,8 +1,8 @@
 // app/purchase/page.js
 "use client";
 import { useEffect, useState } from "react";
-import { getDropdownData } from "../../action/action";
-import { createPurchaseSheet } from "../../action/action";
+import { getDropdownData } from "../../../action/action";
+import { createPurchaseSheet } from "../../../action/action";
 import Link from "next/link";
 
 export default function PurchasePage() {

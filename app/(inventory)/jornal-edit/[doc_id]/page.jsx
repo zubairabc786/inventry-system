@@ -5,7 +5,7 @@ import {
   getDropdownDataJornal,
   getJournalById,
   updateJournal,
-} from "../../action/action";
+} from "../../../action/action";
 
 export default function EditJournalForm({ params }) {
   const { doc_id } = params;

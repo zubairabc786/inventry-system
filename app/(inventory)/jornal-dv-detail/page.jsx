@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAllJournalsDV } from "../action/action";
+import { getAllJournalsDV } from "../../action/action";
 import Link from "next/link";
 import DeleteJornal from "../components/DeleteJornal";
 
