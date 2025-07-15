@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../app/generated/prisma"
+// previewFeatures = ["mongodb"]
+}
+
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum ROLE {
+  USER
+  ADMIN
+}
+
+model User {
+id String @id @default(auto()) @map("_id") @db.ObjectId
+name String @unique
+password String
+}
+
+model InventMaster{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  invoice_no Int 
+  doc_id Int @unique
+  COA  COA @relation(fields: [purchase_code],references: [account_code])
+  purchase_code String      /////// account_code from coa table
+  dated DateTime
+  doc_type String 
+  createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+Purchase Purchase[]
+}
+
+model Purchase {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  InventMaster InventMaster? @relation(fields: [doc_id],references: [doc_id])
+  doc_id Int  //////// take from Invent_Master doc_id
+  Product Product @relation(fields: [product_code],references: [product_code])
+  product_code String  //////// take from product_code
+  quantity Float
+  doc_type String 
+  price Float
+  amount Float       ///// quantity * price
+  remarks String ////////  for extra details
+  total_qty Int
+  total_item Int
+  grandTotal Int
+  calculated_discount Float @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt    
+}
+
+model COA {
+id  String  @id @default(auto()) @map("_id") @db.ObjectId
+account_code String @unique
+account_name String
+contact_no Int
+address String
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+InventMaster InventMaster[]
+JornalDtl JornalDtl[]
+}
+
+model Product {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  product_code String @unique ///// 1001 example
+  product_name  String
+  product_type String      ////// unit of measurement Kg,gm,ltr etc
+  sku String @unique
+  purchase_price Float
+  prophit_percent Float
+  price    Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Purchase Purchase[]
+
+}
+
+
+model JornalMst {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  doc_id Int @unique
+  doc_type String
+  dated DateTime
+  remarks String
+  createdAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  JornalDtl JornalDtl[]
+}
+
+
+model JornalDtl {
+  id  String  @id @default(auto()) @map("_id") @db.ObjectId
+  JornalMst JornalMst @relation(fields: [doc_id],references: [doc_id])
+ doc_id Int 
+  COA COA @relation(fields: [account_code],references: [account_code])
+  account_code String
+  doc_type String
+  debit Float
+  credit Float
+  remarks String
+  createdAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
