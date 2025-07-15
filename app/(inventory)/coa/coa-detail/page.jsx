@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CoaDetail } from "../../action/action";
+import { CoaDetail } from "../../../action/action";
 const CoaDetailPage = () => {
   const router = useRouter();
   const [coa, setCoa] = useState([]);
