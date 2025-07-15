@@ -1,4 +1,4 @@
-import { createInventMaster } from "../../action/action";
+// import { createInventMaster } from "../../action/action";
 import prisma from "../../../utils/connection";
 
 export default async function InventForm() {
@@ -30,7 +30,7 @@ export default async function InventForm() {
         </span>
       </h1>
       <form
-        action={createInventMaster}
+        // action={createInventMaster}
         className="max-w-md mx-auto space-y-4 p-4"
       >
         <div className="space-y-3">
