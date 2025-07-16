@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import Sidebar from "../components/Sidebar";
 import DashboardCard from "../components/DashboardCard";
-// import { getDashboardData } from "../../action/action";
-// import { getStockTableLessFive } from "../../action/action";
+import { getDashboardData } from "../../action/action";
+import { getStockTableLessFive } from "../../action/action";
 import Loading from "../components/Loading";
 
 async function DashboardContent() {
@@ -17,16 +17,16 @@ async function DashboardContent() {
         </span>
       </h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* <DashboardCard title="Total Products" value={product} icon="📦" /> */}
-        {/* <DashboardCard title="Total Sales" value={sale} icon="💰" /> */}
+        <DashboardCard title="Total Products" value={product} icon="📦" />
+        <DashboardCard title="Total Sales" value={sale} icon="💰" />
         <div className="bg-white p-4 rounded-2xl shadow-md flex items-center space-x-4">
           <div className="flex flex-col gap-2 ">
             <h2 className="font-bold text-center ">Stock Alert</h2>
             {stocks.map((item, i) => {
               return (
                 <p className="border-b-2 border-gray-500" key={i}>
-                  <span className="text-green-500">"Fridge"</span>
-                  <span className="text-red-500"> Stock:-(4)</span>
+                  <span className="text-green-500">{item.item_name}</span>
+                  <span className="text-red-500"> Stock:-({item.Stock})</span>
                   <span className="text-green-500"> Less than 5</span>
                 </p>
               );
