@@ -800,75 +800,135 @@ export async function getJournalEntries1(
 }
 
 ////////////// DashBoard Total Sale,Products,Purchases
-export async function getDashboardData() {
-  const sale = await prisma.Purchase.count({
-    where: {
-      doc_type: "SV",
-    },
-  });
-  const purchase = await prisma.Purchase.count({
-    where: {
-      doc_type: "PV",
-    },
-  });
-  const product = await prisma.Product.count();
-  return { sale, purchase, product };
-}
+// export async function getDashboardData() {
+//   const sale = await prisma.Purchase.count({
+//     where: {
+//       doc_type: "SV",
+//     },
+//   });
+//   const purchase = await prisma.Purchase.count({
+//     where: {
+//       doc_type: "PV",
+//     },
+//   });
+//   const product = await prisma.Product.count();
+//   return { sale, purchase, product };
+// }
 
+export async function getDashboardData() {
+  try {
+    const [sale, purchase, product] = await Promise.all([
+      prisma.Purchase.count({ where: { doc_type: "SV" } }),
+      prisma.Purchase.count({ where: { doc_type: "PV" } }),
+      prisma.Product.count(),
+    ]);
+    return { sale, purchase, product };
+  } catch (error) {
+    console.error("Error in getDashboardData:", error);
+    return { sale: 0, purchase: 0, product: 0 }; // Return fallback values
+  }
+}
 ////////////// Get Stock Less than 5 items
 
+// export async function getStockTableLessFive() {
+//   const purchases = await prisma.Purchase.groupBy({
+//     by: ["product_code"],
+//     where: {
+//       doc_type: "PV",
+//     },
+//     _sum: {
+//       quantity: true,
+//     },
+//   });
+
+//   const sales = await prisma.Purchase.groupBy({
+//     by: ["product_code"],
+//     where: {
+//       doc_type: "SV",
+//     },
+//     _sum: {
+//       quantity: true,
+//     },
+//   });
+
+//   const salesMap = {};
+//   for (const s of sales) {
+//     salesMap[s.product_code] = s._sum.quantity || 0;
+//   }
+
+//   const stockData = [];
+
+//   for (const p of purchases) {
+//     const product = await prisma.Product.findUnique({
+//       where: { product_code: p.product_code },
+//     });
+
+//     const purchaseQty = p._sum.quantity || 0;
+//     const saleQty = salesMap[p.product_code] || 0;
+//     const stockQty = purchaseQty - saleQty;
+
+//     // console.log("StockQty=", stockQty);
+//     // Only include if stock is less than 5
+//     if (stockQty < 5) {
+//       stockData.push({
+//         item_code: p.product_code,
+//         item_name: product?.product_name || "",
+//         // Purchase: purchaseQty,
+//         // Sale: saleQty,
+//         Stock: stockQty,
+//         doc_type: "Stock",
+//       });
+//     }
+//   }
+
+//   return stockData;
+// }
 export async function getStockTableLessFive() {
-  const purchases = await prisma.Purchase.groupBy({
-    by: ["product_code"],
-    where: {
-      doc_type: "PV",
-    },
-    _sum: {
-      quantity: true,
-    },
-  });
+  try {
+    const [purchases, sales] = await Promise.all([
+      prisma.Purchase.groupBy({
+        by: ["product_code"],
+        where: { doc_type: "PV" },
+        _sum: { quantity: true },
+      }),
+      prisma.Purchase.groupBy({
+        by: ["product_code"],
+        where: { doc_type: "SV" },
+        _sum: { quantity: true },
+      }),
+    ]);
 
-  const sales = await prisma.Purchase.groupBy({
-    by: ["product_code"],
-    where: {
-      doc_type: "SV",
-    },
-    _sum: {
-      quantity: true,
-    },
-  });
-
-  const salesMap = {};
-  for (const s of sales) {
-    salesMap[s.product_code] = s._sum.quantity || 0;
-  }
-
-  const stockData = [];
-
-  for (const p of purchases) {
-    const product = await prisma.Product.findUnique({
-      where: { product_code: p.product_code },
+    const salesMap = {};
+    sales.forEach((s) => {
+      salesMap[s.product_code] = s._sum.quantity || 0;
     });
 
-    const purchaseQty = p._sum.quantity || 0;
-    const saleQty = salesMap[p.product_code] || 0;
-    const stockQty = purchaseQty - saleQty;
+    const stockData = await Promise.all(
+      purchases.map(async (p) => {
+        const product = await prisma.Product.findUnique({
+          where: { product_code: p.product_code },
+        });
 
-    // console.log("StockQty=", stockQty);
-    // Only include if stock is less than 5
-    if (stockQty < 5) {
-      stockData.push({
-        item_code: p.product_code,
-        item_name: product?.product_name || "",
-        // Purchase: purchaseQty,
-        // Sale: saleQty,
-        Stock: stockQty,
-        doc_type: "Stock",
-      });
-    }
+        const purchaseQty = p._sum.quantity || 0;
+        const saleQty = salesMap[p.product_code] || 0;
+        const stockQty = purchaseQty - saleQty;
+
+        return stockQty < 5
+          ? {
+              item_code: p.product_code,
+              item_name: product?.product_name || "",
+              Stock: stockQty,
+              doc_type: "Stock",
+            }
+          : null;
+      })
+    );
+
+    return stockData.filter(Boolean);
+  } catch (error) {
+    console.error("Error in getStockTableLessFive:", error);
+    return []; // Return empty array as fallback
   }
-
-  return stockData;
 }
 
 ////////////// Create User for login

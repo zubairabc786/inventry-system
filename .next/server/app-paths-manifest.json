@@ -1,10 +1,7 @@
 {
-  "/(inventory)/purchase-detail/page": "app/(inventory)/purchase-detail/page.js",
-  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js",
+  "/(inventory)/products/page": "app/(inventory)/products/page.js",
   "/(inventory)/purchase-sheet/page": "app/(inventory)/purchase-sheet/page.js",
   "/(inventory)/stock-detail/page": "app/(inventory)/stock-detail/page.js",
-  "/(inventory)/invent-master/page": "app/(inventory)/invent-master/page.js",
-  "/(inventory)/sale-sheet/page": "app/(inventory)/sale-sheet/page.js",
   "/(inventory)/coa/page": "app/(inventory)/coa/page.js",
-  "/(inventory)/jornal-jv-form/page": "app/(inventory)/jornal-jv-form/page.js"
+  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js"
 }

@@ -11,15 +11,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(inventory)/layout.js"
     ],
-    "/(inventory)/purchase-detail/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/purchase-detail/page.js"
-    ],
     "/(inventory)/dashboard-inventry/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(inventory)/dashboard-inventry/page.js"
+    ],
+    "/(inventory)/jornal-jv-form/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(inventory)/jornal-jv-form/page.js"
+    ],
+    "/(inventory)/products/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(inventory)/products/page.js"
     ],
     "/(inventory)/purchase-sheet/page": [
       "static/chunks/webpack.js",
@@ -31,25 +36,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(inventory)/stock-detail/page.js"
     ],
-    "/(inventory)/invent-master/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/invent-master/page.js"
-    ],
-    "/(inventory)/sale-sheet/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/sale-sheet/page.js"
-    ],
     "/(inventory)/coa/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(inventory)/coa/page.js"
-    ],
-    "/(inventory)/jornal-jv-form/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/jornal-jv-form/page.js"
     ]
   }
 }
