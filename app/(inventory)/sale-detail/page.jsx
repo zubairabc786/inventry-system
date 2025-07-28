@@ -1,5 +1,6 @@
 import { getInventWithSale } from "../../action/action";
 import DeletePurchase from "../components/DeletePurchase";
+import SearchableSaleList from "../components/SearchableSaleList";
 import Link from "next/link";
 export default async function InventPage() {
   const invents = await getInventWithSale();
@@ -11,7 +12,8 @@ export default async function InventPage() {
           Sale Details
         </span>
       </h1>
-      {invents.map((invent) => (
+      <SearchableSaleList invents={invents} />
+      {/* {invents.map((invent) => (
         <div key={invent.id} className="border p-4 mb-4 rounded-lg shadow">
           <div className="flex justify-between">
             <div>
@@ -72,7 +74,7 @@ export default async function InventPage() {
             </div>
           </div>
         </div>
-      ))}
+      ))} */}
       <div className="flex justify-center mt-4 bg-blue-900">
         <Link href="/sale-sheet" className="text-white p-2">
           Go To Sale Sheet

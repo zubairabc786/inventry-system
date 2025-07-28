@@ -97,8 +97,8 @@ model JornalDtl {
   id  String  @id @default(auto()) @map("_id") @db.ObjectId
   JornalMst JornalMst @relation(fields: [doc_id],references: [doc_id])
  doc_id Int 
-  COA COA @relation(fields: [account_code],references: [account_code])
-  account_code String
+  COA COA? @relation(fields: [account_code],references: [account_code])
+  account_code String?
   doc_type String
   debit Float
   credit Float
