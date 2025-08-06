@@ -11,7 +11,9 @@
   "dependencies": {
     "@prisma/client": "^6.6.0",
     "bcryptjs": "^3.0.2",
+    "html-to-image": "^1.11.13",
     "iron-session": "^8.0.4",
+    "jspdf": "^3.0.1",
     "next": "14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.3.1",
