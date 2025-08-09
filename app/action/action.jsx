@@ -231,6 +231,33 @@ export async function getInventWithPurchase() {
   }
 }
 
+////////////// Get InventMaster with Purchase Return
+export async function getInventWithPurchaseReturn() {
+  try {
+    const data = await prisma.inventMaster.findMany({
+      include: {
+        COA: true,
+        Purchase: {
+          include: {
+            Product: true,
+          },
+        },
+      },
+      where: {
+        doc_type: "PR",
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching InventMaster data:", error.message);
+    return [];
+  }
+}
+
 /////////// Get InventMaster and Sale Detail
 export async function getInventWithSale() {
   try {
@@ -248,6 +275,33 @@ export async function getInventWithSale() {
       },
       orderBy: {
         createdAt: "asc",
+      },
+    });
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching InventMaster data:", error.message);
+    return [];
+  }
+}
+
+/////////// Get Invent with sale return
+export async function getInventWithSaleReturn() {
+  try {
+    const data = await prisma.inventMaster.findMany({
+      include: {
+        COA: true,
+        Purchase: {
+          include: {
+            Product: true,
+          },
+        },
+      },
+      where: {
+        doc_type: "SR",
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
@@ -346,7 +400,79 @@ export async function deleteInventMasterPurchase(doc_id) {
 
 ////////////////// Get Stock Details
 
+// export async function getStockTable() {
+//   const purchases = await prisma.Purchase.groupBy({
+//     by: ["product_code"],
+//     where: {
+//       doc_type: "PV",
+//     },
+//     _sum: {
+//       quantity: true,
+//     },
+//   });
+//   const purchaseReturn = await prisma.Purchase.groupBy({
+//     by: ["product_code"],
+//     where: {
+//       doc_type: "PR",
+//     },
+//     _sum: {
+//       quantity: true,
+//     },
+//   });
+//   // console.log("Purchase=", purchases);
+//   const sales = await prisma.Purchase.groupBy({
+//     by: ["product_code"],
+//     where: {
+//       doc_type: "SV",
+//     },
+//     _sum: {
+//       quantity: true,
+//     },
+//   });
+
+//   const saleReturn = await prisma.Purchase.groupBy({
+//     by: ["product_code"],
+//     where: {
+//       doc_type: "SR",
+//     },
+//     _sum: {
+//       quantity: true,
+//     },
+//   });
+//   // console.log("Sales=", sales);
+
+//   // Create a map for fast lookup of sales
+//   const salesMap = {};
+//   for (const s of sales) {
+//     salesMap[s.product_code] = s._sum.quantity || 0;
+//   }
+
+//   // Build the stock list
+//   const stockData = [];
+
+//   for (const p of purchases) {
+//     const product = await prisma.Product.findUnique({
+//       where: { product_code: p.product_code },
+//     });
+
+//     const purchaseQty = p._sum.quantity || 0;
+//     const saleQty = salesMap[p.product_code] || 0;
+//     const stockQty = purchaseQty - saleQty;
+//     stockData.push({
+//       item_code: p.product_code,
+//       item_name: product?.product_name || "",
+//       Purchase: purchaseQty,
+//       Sale: saleQty,
+//       Stock: stockQty,
+//       doc_type: "Stock",
+//     });
+//   }
+
+//   return stockData;
+// }
+
 export async function getStockTable() {
+  // Get all purchases (PV)
   const purchases = await prisma.Purchase.groupBy({
     by: ["product_code"],
     where: {
@@ -356,7 +482,19 @@ export async function getStockTable() {
       quantity: true,
     },
   });
-  // console.log("Purchase=", purchases);
+
+  // Get all purchase returns (PR)
+  const purchaseReturns = await prisma.Purchase.groupBy({
+    by: ["product_code"],
+    where: {
+      doc_type: "PR",
+    },
+    _sum: {
+      quantity: true,
+    },
+  });
+
+  // Get all sales (SV)
   const sales = await prisma.Purchase.groupBy({
     by: ["product_code"],
     where: {
@@ -366,30 +504,77 @@ export async function getStockTable() {
       quantity: true,
     },
   });
-  // console.log("Sales=", sales);
 
-  // Create a map for fast lookup of sales
+  // Get all sale returns (SR)
+  const saleReturns = await prisma.Purchase.groupBy({
+    by: ["product_code"],
+    where: {
+      doc_type: "SR",
+    },
+    _sum: {
+      quantity: true,
+    },
+  });
+
+  // Create maps for fast lookup
+  const purchasesMap = {};
+  const purchaseReturnsMap = {};
   const salesMap = {};
+  const saleReturnsMap = {};
+
+  for (const p of purchases) {
+    purchasesMap[p.product_code] = p._sum.quantity || 0;
+  }
+
+  for (const pr of purchaseReturns) {
+    purchaseReturnsMap[pr.product_code] = pr._sum.quantity || 0;
+  }
+
   for (const s of sales) {
     salesMap[s.product_code] = s._sum.quantity || 0;
   }
 
+  for (const sr of saleReturns) {
+    saleReturnsMap[sr.product_code] = sr._sum.quantity || 0;
+  }
+
+  // Get all unique product codes
+  const allProductCodes = [
+    ...new Set([
+      ...purchases.map((p) => p.product_code),
+      ...purchaseReturns.map((pr) => pr.product_code),
+      ...sales.map((s) => s.product_code),
+      ...saleReturns.map((sr) => sr.product_code),
+    ]),
+  ];
+
   // Build the stock list
   const stockData = [];
 
-  for (const p of purchases) {
+  for (const productCode of allProductCodes) {
     const product = await prisma.Product.findUnique({
-      where: { product_code: p.product_code },
+      where: { product_code: productCode },
     });
 
-    const purchaseQty = p._sum.quantity || 0;
-    const saleQty = salesMap[p.product_code] || 0;
-    const stockQty = purchaseQty - saleQty;
+    const purchaseQty = purchasesMap[productCode] || 0;
+    const purchaseReturnQty = purchaseReturnsMap[productCode] || 0;
+    const saleQty = salesMap[productCode] || 0;
+    const saleReturnQty = saleReturnsMap[productCode] || 0;
+
+    // Calculate net quantities
+    const netPurchase = purchaseQty - purchaseReturnQty;
+    const netSale = saleQty - saleReturnQty;
+    const stockQty = netPurchase - netSale;
+
     stockData.push({
-      item_code: p.product_code,
+      item_code: productCode,
       item_name: product?.product_name || "",
       Purchase: purchaseQty,
+      Purchase_Return: purchaseReturnQty,
+      Net_Purchase: netPurchase,
       Sale: saleQty,
+      Sale_Return: saleReturnQty,
+      Net_Sale: netSale,
       Stock: stockQty,
       doc_type: "Stock",
     });
@@ -706,39 +891,55 @@ export async function getJournalEntries1(
         }
       : {};
 
-  const [purchases, sales, journalDtls] = await Promise.all([
-    prisma.Purchase.findMany({
-      include: { InventMaster: { include: { COA: true } } },
-      where: {
-        doc_type: "PV",
-        InventMaster: dateFilter,
-      },
-    }),
-    prisma.Purchase.findMany({
-      include: { InventMaster: { include: { COA: true } } },
-      where: {
-        doc_type: "SV",
-        InventMaster: dateFilter,
-      },
-    }),
-    prisma.JornalDtl.findMany({
-      include: { JornalMst: true, COA: true },
-      where:
-        fromDate && toDate
-          ? {
-              JornalMst: {
-                dated: {
-                  gte: new Date(fromDate),
-                  lte: new Date(toDate),
+  const [purchases, sales, saleReturn, purchaseReturn, journalDtls] =
+    await Promise.all([
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "PV",
+          InventMaster: dateFilter,
+        },
+      }),
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "SV",
+          InventMaster: dateFilter,
+        },
+      }),
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "SR",
+          InventMaster: dateFilter,
+        },
+      }),
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "PR",
+          InventMaster: dateFilter,
+        },
+      }),
+      prisma.JornalDtl.findMany({
+        include: { JornalMst: true, COA: true },
+        where:
+          fromDate && toDate
+            ? {
+                JornalMst: {
+                  dated: {
+                    gte: new Date(fromDate),
+                    lte: new Date(toDate),
+                  },
                 },
-              },
-            }
-          : {},
-    }),
-  ]);
+              }
+            : {},
+      }),
+    ]);
 
   const entries = [];
 
+  // Process Purchases (PV)
   purchases.forEach((p) => {
     entries.push({
       account_code: p.InventMaster.COA.account_code,
@@ -751,6 +952,7 @@ export async function getJournalEntries1(
     });
   });
 
+  // Process Sales (SV)
   sales.forEach((p) => {
     entries.push({
       account_code: p.InventMaster.COA.account_code,
@@ -763,6 +965,33 @@ export async function getJournalEntries1(
     });
   });
 
+  // Process Sale Returns (SR) - Opposite of sales
+  saleReturn.forEach((p) => {
+    entries.push({
+      account_code: p.InventMaster.COA.account_code,
+      account_name: p.InventMaster.COA.account_name,
+      date: p.InventMaster.dated,
+      doc_type: p.doc_type,
+      debit: 0, // Opposite of sales entry
+      credit: p.amount, // Opposite of sales entry
+      remarks: p.remarks || "Sale Return",
+    });
+  });
+
+  // Process Purchase Returns (PR) - Opposite of purchases
+  purchaseReturn.forEach((p) => {
+    entries.push({
+      account_code: p.InventMaster.COA.account_code,
+      account_name: p.InventMaster.COA.account_name,
+      date: p.InventMaster.dated,
+      doc_type: p.doc_type,
+      debit: p.amount, // Opposite of purchase entry
+      credit: 0, // Opposite of purchase entry
+      remarks: p.remarks || "Purchase Return",
+    });
+  });
+
+  // Process Journal Entries
   journalDtls.forEach((j) => {
     entries.push({
       account_code: j.account_code,
@@ -775,12 +1004,14 @@ export async function getJournalEntries1(
     });
   });
 
+  // Filter entries based on search term
   const filtered = entries.filter(
     (e) =>
       e.account_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.account_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Sort entries by account code and date
   filtered.sort((a, b) => {
     if (a.account_code !== b.account_code) {
       return a.account_code.localeCompare(b.account_code);
@@ -788,6 +1019,7 @@ export async function getJournalEntries1(
     return new Date(a.date) - new Date(b.date);
   });
 
+  // Calculate running balances
   const result = [];
   const balances = {};
   filtered.forEach((e) => {

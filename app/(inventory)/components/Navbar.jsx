@@ -11,10 +11,12 @@ export default function Navbar() {
     { name: "Dashboard", href: "/dashboard-inventry" },
     { name: "Products", href: "/products" },
     { name: "Sales", href: "/sale-sheet" },
+    { name: "Sale-Return", href: "/sale-return" },
     { name: "Purchases", href: "/purchase-sheet" },
+    { name: "Purchase-Return", href: "/purchase-return" },
     { name: "Stock", href: "/stock-detail" },
-    { name: "Chart of Accounts", href: "/coa" },
-    { name: "Ledger Entries", href: "/jornal-jv-form" },
+    { name: "Accounts", href: "/coa" },
+    { name: "Jornal Voucher", href: "/jornal-jv-form" },
   ];
 
   return (

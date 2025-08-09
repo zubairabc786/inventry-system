@@ -26,7 +26,7 @@ export default function DeleteButton({ doc_id, Sale }) {
       onClick={handleDelete}
       disabled={isPending}
     >
-      {isPending ? "Deleting..." : `Delete ${Sale}`}
+      {isPending ? "Deleting..." : `Delete`}
     </button>
   );
 }
