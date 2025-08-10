@@ -1,8 +1,8 @@
 {
-  "/(inventory)/stock-detail/page": "app/(inventory)/stock-detail/page.js",
-  "/(inventory)/purchase-return-detail/page": "app/(inventory)/purchase-return-detail/page.js",
-  "/(inventory)/sale-return/page": "app/(inventory)/sale-return/page.js",
-  "/(inventory)/sale-return-detail/page": "app/(inventory)/sale-return-detail/page.js",
-  "/(inventory)/sale-edit/[doc_id]/page": "app/(inventory)/sale-edit/[doc_id]/page.js",
-  "/(inventory)/sale-detail/page": "app/(inventory)/sale-detail/page.js"
+  "/page": "app/page.js",
+  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js",
+  "/(inventory)/products/page": "app/(inventory)/products/page.js",
+  "/(inventory)/sale-sheet/page": "app/(inventory)/sale-sheet/page.js",
+  "/(inventory)/jornal-jv-form/page": "app/(inventory)/jornal-jv-form/page.js",
+  "/(inventory)/ledger-entries/page": "app/(inventory)/ledger-entries/page.js"
 }

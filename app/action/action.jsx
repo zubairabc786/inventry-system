@@ -400,77 +400,6 @@ export async function deleteInventMasterPurchase(doc_id) {
 
 ////////////////// Get Stock Details
 
-// export async function getStockTable() {
-//   const purchases = await prisma.Purchase.groupBy({
-//     by: ["product_code"],
-//     where: {
-//       doc_type: "PV",
-//     },
-//     _sum: {
-//       quantity: true,
-//     },
-//   });
-//   const purchaseReturn = await prisma.Purchase.groupBy({
-//     by: ["product_code"],
-//     where: {
-//       doc_type: "PR",
-//     },
-//     _sum: {
-//       quantity: true,
-//     },
-//   });
-//   // console.log("Purchase=", purchases);
-//   const sales = await prisma.Purchase.groupBy({
-//     by: ["product_code"],
-//     where: {
-//       doc_type: "SV",
-//     },
-//     _sum: {
-//       quantity: true,
-//     },
-//   });
-
-//   const saleReturn = await prisma.Purchase.groupBy({
-//     by: ["product_code"],
-//     where: {
-//       doc_type: "SR",
-//     },
-//     _sum: {
-//       quantity: true,
-//     },
-//   });
-//   // console.log("Sales=", sales);
-
-//   // Create a map for fast lookup of sales
-//   const salesMap = {};
-//   for (const s of sales) {
-//     salesMap[s.product_code] = s._sum.quantity || 0;
-//   }
-
-//   // Build the stock list
-//   const stockData = [];
-
-//   for (const p of purchases) {
-//     const product = await prisma.Product.findUnique({
-//       where: { product_code: p.product_code },
-//     });
-
-//     const purchaseQty = p._sum.quantity || 0;
-//     const saleQty = salesMap[p.product_code] || 0;
-//     const stockQty = purchaseQty - saleQty;
-//     stockData.push({
-//       item_code: p.product_code,
-//       item_name: product?.product_name || "",
-//       Purchase: purchaseQty,
-//       Sale: saleQty,
-//       Stock: stockQty,
-//       doc_type: "Stock",
-//     });
-//   }
-
-//   return stockData;
-// }
-
 export async function getStockTable() {
   // Get all purchases (PV)
   const purchases = await prisma.Purchase.groupBy({
@@ -876,6 +805,161 @@ export async function getTrialBalance() {
 
 //////////// Get Journal Entries function
 
+// export async function getJournalEntries1(
+//   searchTerm = "",
+//   fromDate = null,
+//   toDate = null
+// ) {
+//   const dateFilter =
+//     fromDate && toDate
+//       ? {
+//           dated: {
+//             gte: new Date(fromDate),
+//             lte: new Date(toDate),
+//           },
+//         }
+//       : {};
+
+//   const [purchases, sales, saleReturn, purchaseReturn, journalDtls] =
+//     await Promise.all([
+//       prisma.Purchase.findMany({
+//         include: { InventMaster: { include: { COA: true } } },
+//         where: {
+//           doc_type: "PV",
+//           InventMaster: dateFilter,
+//         },
+//       }),
+//       prisma.Purchase.findMany({
+//         include: { InventMaster: { include: { COA: true } } },
+//         where: {
+//           doc_type: "SV",
+//           InventMaster: dateFilter,
+//         },
+//       }),
+//       prisma.Purchase.findMany({
+//         include: { InventMaster: { include: { COA: true } } },
+//         where: {
+//           doc_type: "SR",
+//           InventMaster: dateFilter,
+//         },
+//       }),
+//       prisma.Purchase.findMany({
+//         include: { InventMaster: { include: { COA: true } } },
+//         where: {
+//           doc_type: "PR",
+//           InventMaster: dateFilter,
+//         },
+//       }),
+//       prisma.JornalDtl.findMany({
+//         include: { JornalMst: true, COA: true },
+//         where:
+//           fromDate && toDate
+//             ? {
+//                 JornalMst: {
+//                   dated: {
+//                     gte: new Date(fromDate),
+//                     lte: new Date(toDate),
+//                   },
+//                 },
+//               }
+//             : {},
+//       }),
+//     ]);
+
+//   const entries = [];
+
+//   // Process Purchases (PV)
+//   purchases.forEach((p) => {
+//     entries.push({
+//       account_code: p.InventMaster.COA.account_code,
+//       account_name: p.InventMaster.COA.account_name,
+//       date: p.InventMaster.dated,
+//       doc_type: p.doc_type,
+//       debit: 0,
+//       credit: p.amount,
+//       remarks: p.remarks || "",
+//     });
+//   });
+
+//   // Process Sales (SV)
+//   sales.forEach((p) => {
+//     entries.push({
+//       account_code: p.InventMaster.COA.account_code,
+//       account_name: p.InventMaster.COA.account_name,
+//       date: p.InventMaster.dated,
+//       doc_type: p.doc_type,
+//       debit: p.amount,
+//       credit: 0,
+//       remarks: p.remarks || "",
+//     });
+//   });
+
+//   // Process Sale Returns (SR) - Opposite of sales
+//   saleReturn.forEach((p) => {
+//     entries.push({
+//       account_code: p.InventMaster.COA.account_code,
+//       account_name: p.InventMaster.COA.account_name,
+//       date: p.InventMaster.dated,
+//       doc_type: p.doc_type,
+//       debit: 0, // Opposite of sales entry
+//       credit: p.amount, // Opposite of sales entry
+//       remarks: p.remarks || "Sale Return",
+//     });
+//   });
+
+//   // Process Purchase Returns (PR) - Opposite of purchases
+//   purchaseReturn.forEach((p) => {
+//     entries.push({
+//       account_code: p.InventMaster.COA.account_code,
+//       account_name: p.InventMaster.COA.account_name,
+//       date: p.InventMaster.dated,
+//       doc_type: p.doc_type,
+//       debit: p.amount, // Opposite of purchase entry
+//       credit: 0, // Opposite of purchase entry
+//       remarks: p.remarks || "Purchase Return",
+//     });
+//   });
+
+//   // Process Journal Entries
+//   journalDtls.forEach((j) => {
+//     entries.push({
+//       account_code: j.account_code,
+//       account_name: j.COA.account_name,
+//       date: j.JornalMst.dated,
+//       doc_type: j.doc_type,
+//       debit: j.debit,
+//       credit: j.credit,
+//       remarks: j.remarks || "",
+//     });
+//   });
+
+//   // Filter entries based on search term
+//   const filtered = entries.filter(
+//     (e) =>
+//       e.account_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       e.account_name.toLowerCase().includes(searchTerm.toLowerCase())
+//   );
+
+//   // Sort entries by account code and date
+//   filtered.sort((a, b) => {
+//     if (a.account_code !== b.account_code) {
+//       return a.account_code.localeCompare(b.account_code);
+//     }
+//     return new Date(a.date) - new Date(b.date);
+//   });
+
+//   // Calculate running balances
+//   const result = [];
+//   const balances = {};
+//   filtered.forEach((e) => {
+//     if (!balances[e.account_code]) balances[e.account_code] = 0;
+//     balances[e.account_code] += e.debit - e.credit;
+//     result.push({ ...e, balance: balances[e.account_code] });
+//   });
+
+//   return result;
+// }
+
 export async function getJournalEntries1(
   searchTerm = "",
   fromDate = null,
@@ -938,8 +1022,110 @@ export async function getJournalEntries1(
     ]);
 
   const entries = [];
+  const openingBalances = {};
 
-  // Process Purchases (PV)
+  // Calculate opening balances if date range is specified
+  if (fromDate) {
+    const [
+      openingPurchases,
+      openingSales,
+      openingSaleReturn,
+      openingPurchaseReturn,
+      openingJournalDtls,
+    ] = await Promise.all([
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "PV",
+          InventMaster: {
+            dated: {
+              lt: new Date(fromDate),
+            },
+          },
+        },
+      }),
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "SV",
+          InventMaster: {
+            dated: {
+              lt: new Date(fromDate),
+            },
+          },
+        },
+      }),
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "SR",
+          InventMaster: {
+            dated: {
+              lt: new Date(fromDate),
+            },
+          },
+        },
+      }),
+      prisma.Purchase.findMany({
+        include: { InventMaster: { include: { COA: true } } },
+        where: {
+          doc_type: "PR",
+          InventMaster: {
+            dated: {
+              lt: new Date(fromDate),
+            },
+          },
+        },
+      }),
+      prisma.JornalDtl.findMany({
+        include: { JornalMst: true, COA: true },
+        where: {
+          JornalMst: {
+            dated: {
+              lt: new Date(fromDate),
+            },
+          },
+        },
+      }),
+    ]);
+
+    // Process opening Purchases (PV)
+    openingPurchases.forEach((p) => {
+      const accountCode = p.InventMaster.COA.account_code;
+      openingBalances[accountCode] =
+        (openingBalances[accountCode] || 0) - p.amount;
+    });
+
+    // Process opening Sales (SV)
+    openingSales.forEach((p) => {
+      const accountCode = p.InventMaster.COA.account_code;
+      openingBalances[accountCode] =
+        (openingBalances[accountCode] || 0) + p.amount;
+    });
+
+    // Process opening Sale Returns (SR)
+    openingSaleReturn.forEach((p) => {
+      const accountCode = p.InventMaster.COA.account_code;
+      openingBalances[accountCode] =
+        (openingBalances[accountCode] || 0) + p.amount;
+    });
+
+    // Process opening Purchase Returns (PR)
+    openingPurchaseReturn.forEach((p) => {
+      const accountCode = p.InventMaster.COA.account_code;
+      openingBalances[accountCode] =
+        (openingBalances[accountCode] || 0) - p.amount;
+    });
+
+    // Process opening Journal Entries
+    openingJournalDtls.forEach((j) => {
+      const accountCode = j.account_code;
+      openingBalances[accountCode] =
+        (openingBalances[accountCode] || 0) + (j.debit - j.credit);
+    });
+  }
+
+  // Process current period Purchases (PV)
   purchases.forEach((p) => {
     entries.push({
       account_code: p.InventMaster.COA.account_code,
@@ -952,7 +1138,7 @@ export async function getJournalEntries1(
     });
   });
 
-  // Process Sales (SV)
+  // Process current period Sales (SV)
   sales.forEach((p) => {
     entries.push({
       account_code: p.InventMaster.COA.account_code,
@@ -965,33 +1151,33 @@ export async function getJournalEntries1(
     });
   });
 
-  // Process Sale Returns (SR) - Opposite of sales
+  // Process current period Sale Returns (SR)
   saleReturn.forEach((p) => {
     entries.push({
       account_code: p.InventMaster.COA.account_code,
       account_name: p.InventMaster.COA.account_name,
       date: p.InventMaster.dated,
       doc_type: p.doc_type,
-      debit: 0, // Opposite of sales entry
-      credit: p.amount, // Opposite of sales entry
+      debit: 0,
+      credit: p.amount,
       remarks: p.remarks || "Sale Return",
     });
   });
 
-  // Process Purchase Returns (PR) - Opposite of purchases
+  // Process current period Purchase Returns (PR)
   purchaseReturn.forEach((p) => {
     entries.push({
       account_code: p.InventMaster.COA.account_code,
       account_name: p.InventMaster.COA.account_name,
       date: p.InventMaster.dated,
       doc_type: p.doc_type,
-      debit: p.amount, // Opposite of purchase entry
-      credit: 0, // Opposite of purchase entry
+      debit: p.amount,
+      credit: 0,
       remarks: p.remarks || "Purchase Return",
     });
   });
 
-  // Process Journal Entries
+  // Process current period Journal Entries
   journalDtls.forEach((j) => {
     entries.push({
       account_code: j.account_code,
@@ -1019,13 +1205,48 @@ export async function getJournalEntries1(
     return new Date(a.date) - new Date(b.date);
   });
 
-  // Calculate running balances
+  // Group entries by account and calculate running balances
   const result = [];
-  const balances = {};
+  const accounts = {};
+
+  // Group entries by account code
   filtered.forEach((e) => {
-    if (!balances[e.account_code]) balances[e.account_code] = 0;
-    balances[e.account_code] += e.debit - e.credit;
-    result.push({ ...e, balance: balances[e.account_code] });
+    if (!accounts[e.account_code]) {
+      accounts[e.account_code] = {
+        entries: [],
+        account_name: e.account_name,
+      };
+    }
+    accounts[e.account_code].entries.push(e);
+  });
+
+  // Process each account
+  Object.entries(accounts).forEach(([accountCode, accountData]) => {
+    let balance = openingBalances[accountCode] || 0;
+
+    // Add opening balance row if date range is specified
+    if (fromDate) {
+      result.push({
+        account_code: accountCode,
+        account_name: accountData.account_name,
+        date: new Date(fromDate),
+        doc_type: "OB",
+        debit: 0,
+        credit: 0,
+        balance: balance,
+        isOpeningBalance: true,
+        remarks: "Opening Balance",
+      });
+    }
+
+    // Add regular entries
+    accountData.entries.forEach((e) => {
+      balance += e.debit - e.credit;
+      result.push({
+        ...e,
+        balance: balance,
+      });
+    });
   });
 
   return result;
