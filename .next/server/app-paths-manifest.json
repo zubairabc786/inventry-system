@@ -1,8 +1,7 @@
 {
-  "/page": "app/page.js",
-  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js",
-  "/(inventory)/products/page": "app/(inventory)/products/page.js",
+  "/(inventory)/trial-balance/page": "app/(inventory)/trial-balance/page.js",
   "/(inventory)/sale-sheet/page": "app/(inventory)/sale-sheet/page.js",
-  "/(inventory)/jornal-jv-form/page": "app/(inventory)/jornal-jv-form/page.js",
+  "/(inventory)/sale-return/page": "app/(inventory)/sale-return/page.js",
+  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js",
   "/(inventory)/ledger-entries/page": "app/(inventory)/ledger-entries/page.js"
 }

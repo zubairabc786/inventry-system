@@ -751,51 +751,85 @@ export async function getJournalEntries() {
 
 //////////// Get Trial Balance
 
-export async function getTrialBalance() {
+export async function getTrialBalance(fromDate = null, toDate = null) {
   try {
-    const journalEntries = await getJournalEntries();
+    // Get all journal entries for the period
+    const journalEntries = await getJournalEntries1("", fromDate, toDate);
+
     const trialBalance = {};
 
+    // Process each journal entry
     journalEntries.forEach((entry) => {
       if (!trialBalance[entry.account_code]) {
         trialBalance[entry.account_code] = {
-          doc_type: entry.doc_type,
           account_code: entry.account_code,
           account_name: entry.account_name,
           debit: 0,
           credit: 0,
-          balance: 0,
+          balance: 0, // This will be debit - credit
         };
       }
 
-      if (entry.doc_type === "SV") {
-        trialBalance[entry.account_code].debit += entry.credit;
-      } else if (entry.doc_type === "PV") {
-        trialBalance[entry.account_code].credit += entry.debit;
-      } else {
-        trialBalance[entry.account_code].debit += entry.debit;
-        trialBalance[entry.account_code].credit += entry.credit;
+      // Skip opening balance entries
+      if (entry.isOpeningBalance) return;
+
+      // Handle different document types
+      switch (entry.doc_type) {
+        case "PV": // Purchase Voucher (expense - normally debit, but shown as credit in journal)
+          trialBalance[entry.account_code].credit += entry.credit;
+          break;
+        case "SV": // Sales Voucher (revenue - normally credit, but shown as debit in journal)
+          trialBalance[entry.account_code].debit += entry.debit;
+          break;
+        case "PR": // Purchase Return (reduction in expense - credit)
+          trialBalance[entry.account_code].debit += entry.debit;
+          break;
+        case "SR": // Sales Return (reduction in revenue - debit)
+          trialBalance[entry.account_code].credit += entry.credit;
+          break;
+        default: // JV (Journal Voucher) and others
+          trialBalance[entry.account_code].debit += entry.debit;
+          trialBalance[entry.account_code].credit += entry.credit;
+          break;
       }
 
+      // Calculate net balance (debit - credit)
       trialBalance[entry.account_code].balance =
         trialBalance[entry.account_code].debit -
         trialBalance[entry.account_code].credit;
     });
 
+    // Convert to array and sort by account code
     const trialBalanceArray = Object.values(trialBalance).sort((a, b) =>
       a.account_code.localeCompare(b.account_code)
     );
-    const totals = {
+
+    // Calculate totals
+    const totalDebit = trialBalanceArray.reduce(
+      (sum, acc) => sum + acc.debit,
+      0
+    );
+    const totalCredit = trialBalanceArray.reduce(
+      (sum, acc) => sum + acc.credit,
+      0
+    );
+    const netBalance = totalDebit - totalCredit;
+
+    // Add totals row
+    trialBalanceArray.push({
       account_code: "TOTAL",
       account_name: "",
-      debit: trialBalanceArray.reduce((sum, acc) => sum + acc.debit, 0),
-      credit: trialBalanceArray.reduce((sum, acc) => sum + acc.credit, 0),
-      balance: 0,
-      doc_type: "",
-    };
+      debit: totalDebit,
+      credit: totalCredit,
+      balance: netBalance,
+    });
 
-    trialBalanceArray.push(totals);
-    // console.log(trialBalanceArray);
+    // Verify that debits equal credits (accounting equation)
+    if (Math.abs(netBalance) > 0.01) {
+      // Allow for rounding differences
+      console.warn(`Trial balance out of balance by ${netBalance}`);
+    }
+
     return trialBalanceArray;
   } catch (error) {
     console.error("Error generating trial balance:", error);
@@ -804,161 +838,6 @@ export async function getTrialBalance() {
 }
 
 //////////// Get Journal Entries function
-
-// export async function getJournalEntries1(
-//   searchTerm = "",
-//   fromDate = null,
-//   toDate = null
-// ) {
-//   const dateFilter =
-//     fromDate && toDate
-//       ? {
-//           dated: {
-//             gte: new Date(fromDate),
-//             lte: new Date(toDate),
-//           },
-//         }
-//       : {};
-
-//   const [purchases, sales, saleReturn, purchaseReturn, journalDtls] =
-//     await Promise.all([
-//       prisma.Purchase.findMany({
-//         include: { InventMaster: { include: { COA: true } } },
-//         where: {
-//           doc_type: "PV",
-//           InventMaster: dateFilter,
-//         },
-//       }),
-//       prisma.Purchase.findMany({
-//         include: { InventMaster: { include: { COA: true } } },
-//         where: {
-//           doc_type: "SV",
-//           InventMaster: dateFilter,
-//         },
-//       }),
-//       prisma.Purchase.findMany({
-//         include: { InventMaster: { include: { COA: true } } },
-//         where: {
-//           doc_type: "SR",
-//           InventMaster: dateFilter,
-//         },
-//       }),
-//       prisma.Purchase.findMany({
-//         include: { InventMaster: { include: { COA: true } } },
-//         where: {
-//           doc_type: "PR",
-//           InventMaster: dateFilter,
-//         },
-//       }),
-//       prisma.JornalDtl.findMany({
-//         include: { JornalMst: true, COA: true },
-//         where:
-//           fromDate && toDate
-//             ? {
-//                 JornalMst: {
-//                   dated: {
-//                     gte: new Date(fromDate),
-//                     lte: new Date(toDate),
-//                   },
-//                 },
-//               }
-//             : {},
-//       }),
-//     ]);
-
-//   const entries = [];
-
-//   // Process Purchases (PV)
-//   purchases.forEach((p) => {
-//     entries.push({
-//       account_code: p.InventMaster.COA.account_code,
-//       account_name: p.InventMaster.COA.account_name,
-//       date: p.InventMaster.dated,
-//       doc_type: p.doc_type,
-//       debit: 0,
-//       credit: p.amount,
-//       remarks: p.remarks || "",
-//     });
-//   });
-
-//   // Process Sales (SV)
-//   sales.forEach((p) => {
-//     entries.push({
-//       account_code: p.InventMaster.COA.account_code,
-//       account_name: p.InventMaster.COA.account_name,
-//       date: p.InventMaster.dated,
-//       doc_type: p.doc_type,
-//       debit: p.amount,
-//       credit: 0,
-//       remarks: p.remarks || "",
-//     });
-//   });
-
-//   // Process Sale Returns (SR) - Opposite of sales
-//   saleReturn.forEach((p) => {
-//     entries.push({
-//       account_code: p.InventMaster.COA.account_code,
-//       account_name: p.InventMaster.COA.account_name,
-//       date: p.InventMaster.dated,
-//       doc_type: p.doc_type,
-//       debit: 0, // Opposite of sales entry
-//       credit: p.amount, // Opposite of sales entry
-//       remarks: p.remarks || "Sale Return",
-//     });
-//   });
-
-//   // Process Purchase Returns (PR) - Opposite of purchases
-//   purchaseReturn.forEach((p) => {
-//     entries.push({
-//       account_code: p.InventMaster.COA.account_code,
-//       account_name: p.InventMaster.COA.account_name,
-//       date: p.InventMaster.dated,
-//       doc_type: p.doc_type,
-//       debit: p.amount, // Opposite of purchase entry
-//       credit: 0, // Opposite of purchase entry
-//       remarks: p.remarks || "Purchase Return",
-//     });
-//   });
-
-//   // Process Journal Entries
-//   journalDtls.forEach((j) => {
-//     entries.push({
-//       account_code: j.account_code,
-//       account_name: j.COA.account_name,
-//       date: j.JornalMst.dated,
-//       doc_type: j.doc_type,
-//       debit: j.debit,
-//       credit: j.credit,
-//       remarks: j.remarks || "",
-//     });
-//   });
-
-//   // Filter entries based on search term
-//   const filtered = entries.filter(
-//     (e) =>
-//       e.account_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       e.account_name.toLowerCase().includes(searchTerm.toLowerCase())
-//   );
-
-//   // Sort entries by account code and date
-//   filtered.sort((a, b) => {
-//     if (a.account_code !== b.account_code) {
-//       return a.account_code.localeCompare(b.account_code);
-//     }
-//     return new Date(a.date) - new Date(b.date);
-//   });
-
-//   // Calculate running balances
-//   const result = [];
-//   const balances = {};
-//   filtered.forEach((e) => {
-//     if (!balances[e.account_code]) balances[e.account_code] = 0;
-//     balances[e.account_code] += e.debit - e.credit;
-//     result.push({ ...e, balance: balances[e.account_code] });
-//   });
-
-//   return result;
-// }
 
 export async function getJournalEntries1(
   searchTerm = "",
@@ -1107,14 +986,14 @@ export async function getJournalEntries1(
     openingSaleReturn.forEach((p) => {
       const accountCode = p.InventMaster.COA.account_code;
       openingBalances[accountCode] =
-        (openingBalances[accountCode] || 0) + p.amount;
+        (openingBalances[accountCode] || 0) - p.amount;
     });
 
     // Process opening Purchase Returns (PR)
     openingPurchaseReturn.forEach((p) => {
       const accountCode = p.InventMaster.COA.account_code;
       openingBalances[accountCode] =
-        (openingBalances[accountCode] || 0) - p.amount;
+        (openingBalances[accountCode] || 0) + p.amount;
     });
 
     // Process opening Journal Entries
