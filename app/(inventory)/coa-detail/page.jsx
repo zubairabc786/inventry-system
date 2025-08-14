@@ -25,7 +25,7 @@ const CoaDetailPage = () => {
       <table className="min-w-full border mt-6 border-gray-300">
         <thead className="bg-gray-100">
           <tr>
-            <th className="border px-4 py-2">ID</th>
+            {/* <th className="border px-4 py-2">ID</th> */}
             <th className="border px-4 py-2">Account Code</th>
             <th className="border px-4 py-2">Account Name</th>
             <th className="border px-4 py-2">Contact No</th>
@@ -35,7 +35,7 @@ const CoaDetailPage = () => {
         <tbody>
           {coa.map((record) => (
             <tr key={record.id}>
-              <td className="border px-4 py-2 text-center">{record.id}</td>
+              {/* <td className="border px-4 py-2 text-center">{record.id}</td> */}
               <td className="border px-4 py-2 text-center">
                 {record.account_code}
               </td>

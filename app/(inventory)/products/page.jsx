@@ -1,158 +1,10 @@
-// "use client";
-// import { createProduct } from "../../action/action";
-// import { useRef, useState, useEffect } from "react";
-
-// export default function ProductForm() {
-//   const formRef = useRef(null);
-//   const [price, setPrice] = useState(0);
-//   const [message, setMessage] = useState("");
-//   const [nextProductCode, setNextProductCode] = useState("");
-
-//   const handlePriceCalculation = () => {
-//     const form = formRef.current;
-//     if (!form) return;
-
-//     const purchasePrice = parseFloat(form.purchase_price.value) || 0;
-//     const profitPercent = parseFloat(form.prophit_percent.value) || 0;
-//     const calculatedPrice =
-//       purchasePrice + (purchasePrice * profitPercent) / 100;
-//     setPrice(calculatedPrice.toFixed(2));
-//     console.log(purchasePrice);
-//     console.log(profitPercent);
-//   };
-
-//   console.log(price);
-//   useEffect(() => {
-//     const form = formRef.current;
-//     if (!form) return;
-
-//     const inputs = [form.purchase_price, form.prophit_percent];
-//     inputs.forEach((input) => {
-//       input.addEventListener("input", handlePriceCalculation);
-//     });
-
-//     return () => {
-//       inputs.forEach((input) => {
-//         input.removeEventListener("input", handlePriceCalculation);
-//       });
-//     };
-//   }, []);
-
-//   const handleSubmit = async (formData) => {
-//     const { success, newCode, nextProductCode } = await createProduct(formData);
-//     if (success) {
-//       setMessage(`✅ Product saved successfully! ${newCode}`);
-//       setNextProductCode(`Next Product Code is sku:${nextProductCode}`);
-//       setTimeout(() => {
-//         setMessage("");
-//         setNextProductCode("");
-//       }, 3000);
-//       formRef.current?.reset();
-//       setPrice(0);
-//     }
-//   };
-
-//   return (
-//     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-//       <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
-//       {message && <p className="text-green-500 mb-2">{message}</p>}
-//       {nextProductCode && (
-//         <p className="text-blue-500 mb-2">{nextProductCode}</p>
-//       )}
-//       <form
-//         ref={formRef}
-//         id="product-form"
-//         action={handleSubmit}
-//         className="space-y-2"
-//       >
-//         <div>
-//           <label
-//             htmlFor="product_name"
-//             className="block text-sm font-medium text-gray-700"
-//           >
-//             Product Name
-//           </label>
-//           <input
-//             type="text"
-//             id="product_name"
-//             name="product_name"
-//             required
-//             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-//           />
-//         </div>
-
-//         <div>
-//           <label
-//             htmlFor="product_type"
-//             className="block text-sm font-medium text-gray-700"
-//           >
-//             Product Type (Unit)
-//           </label>
-//           <input
-//             type="text"
-//             id="product_type"
-//             name="product_type"
-//             required
-//             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-medium text-gray-700">
-//             Purchase Price
-//           </label>
-//           <input
-//             type="number"
-//             step="0.01"
-//             id="purchase_price"
-//             name="purchase_price"
-//             required
-//             // ref={purchasePriceRef}
-//             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-medium text-gray-700">
-//             Profit Percent
-//           </label>
-//           <input
-//             type="number"
-//             step="0.01"
-//             id="prophit_percent"
-//             name="prophit_percent"
-//             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-//           />
-//         </div>
-
-//         <div>
-//           <label className="block text-sm font-medium text-gray-700">
-//             Price
-//           </label>
-//           <input
-//             type="number"
-//             step="0.01"
-//             id="price"
-//             name="price"
-//             value={price}
-//             readOnly
-//             className="bg-gray-100 mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
-//           />
-//         </div>
-
-//         <button
-//           type="submit"
-//           className="w-full py-2 px-4 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700"
-//         >
-//           Add Product
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
 "use client";
-import { createProduct, getProducts } from "../../action/action";
+import {
+  createProduct,
+  getProducts,
+  updateProduct,
+  deleteProduct,
+} from "../../action/action";
 import { useRef, useState, useEffect } from "react";
 
 export default function ProductManagement() {
@@ -162,6 +14,7 @@ export default function ProductManagement() {
   const [nextProductCode, setNextProductCode] = useState("");
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   // Fetch products on component mount
   useEffect(() => {
@@ -206,21 +59,82 @@ export default function ProductManagement() {
   }, []);
 
   const handleSubmit = async (formData) => {
-    const { success, newCode, nextProductCode } = await createProduct(formData);
-    if (success) {
-      setMessage(`✅ Product saved successfully! ${newCode}`);
-      setNextProductCode(`Next Product Code is sku:${nextProductCode}`);
+    if (editingProduct) {
+      // Update existing product
+      formData.append("product_code", editingProduct.product_code);
+      const { success, message } = await updateProduct(formData);
+      if (success) {
+        setMessage(`✅ ${message}`);
 
-      // Refresh product list
-      const updatedProducts = await getProducts();
-      setProducts(updatedProducts);
+        // Refresh product list
+        const updatedProducts = await getProducts();
+        setProducts(updatedProducts);
+        setEditingProduct(null);
 
-      setTimeout(() => {
-        setMessage("");
-        setNextProductCode("");
-      }, 3000);
-      formRef.current?.reset();
-      setPrice(0);
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+        formRef.current?.reset();
+        setPrice(0);
+      }
+    } else {
+      // Create new product
+      const { success, newCode, nextProductCode } = await createProduct(
+        formData
+      );
+      if (success) {
+        setMessage(`✅ Product saved successfully! ${newCode}`);
+        setNextProductCode(`Next Product Code is sku:${nextProductCode}`);
+
+        // Refresh product list
+        const updatedProducts = await getProducts();
+        setProducts(updatedProducts);
+
+        setTimeout(() => {
+          setMessage("");
+          setNextProductCode("");
+        }, 3000);
+        formRef.current?.reset();
+        setPrice(0);
+      }
+    }
+  };
+
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+    setPrice(product.price);
+
+    // Set form values
+    const form = formRef.current;
+    if (form) {
+      form.product_name.value = product.product_name;
+      form.product_type.value = product.product_type;
+      form.purchase_price.value = product.purchase_price;
+      form.prophit_percent.value = product.prophit_percent;
+      form.price.value = product.price;
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingProduct(null);
+    formRef.current?.reset();
+    setPrice(0);
+  };
+
+  const handleDelete = async (productCode) => {
+    if (confirm("Are you sure you want to delete this product?")) {
+      const { success, message } = await deleteProduct(productCode);
+      if (success) {
+        setMessage(`✅ ${message}`);
+
+        // Refresh product list
+        const updatedProducts = await getProducts();
+        setProducts(updatedProducts);
+
+        setTimeout(() => {
+          setMessage("");
+        }, 3000);
+      }
     }
   };
 
@@ -235,7 +149,7 @@ export default function ProductManagement() {
         <div className="lg:w-1/2">
           <div className="bg-white rounded-xl shadow-md p-6 sticky top-6">
             <h2 className="text-2xl font-semibold text-gray-700 mb-6">
-              Add New Product
+              {editingProduct ? "Edit Product" : "Add New Product"}
             </h2>
 
             {message && (
@@ -244,7 +158,7 @@ export default function ProductManagement() {
               </div>
             )}
 
-            {nextProductCode && (
+            {!editingProduct && nextProductCode && (
               <div className="mb-4 p-3 bg-blue-50 text-blue-700 rounded-lg">
                 {nextProductCode}
               </div>
@@ -332,12 +246,24 @@ export default function ProductManagement() {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
-              >
-                Add Product
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="flex-1 py-3 px-4 bg-indigo-600 text-white font-medium rounded-lg shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
+                >
+                  {editingProduct ? "Update Product" : "Add Product"}
+                </button>
+
+                {editingProduct && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="py-3 px-4 bg-gray-200 text-gray-700 font-medium rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
             </form>
           </div>
         </div>
@@ -382,6 +308,12 @@ export default function ProductManagement() {
                       >
                         Price
                       </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -400,7 +332,7 @@ export default function ProductManagement() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
-                            {product.prophit_percent}
+                            {product.prophit_percent}%
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -410,6 +342,20 @@ export default function ProductManagement() {
                           <div className="text-xs text-gray-500">
                             Cost: ${product.purchase_price}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.product_code)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}

@@ -1,7 +1,7 @@
 {
-  "/(inventory)/trial-balance/page": "app/(inventory)/trial-balance/page.js",
-  "/(inventory)/sale-sheet/page": "app/(inventory)/sale-sheet/page.js",
-  "/(inventory)/sale-return/page": "app/(inventory)/sale-return/page.js",
   "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js",
-  "/(inventory)/ledger-entries/page": "app/(inventory)/ledger-entries/page.js"
+  "/(inventory)/coa/page": "app/(inventory)/coa/page.js",
+  "/(inventory)/products/page": "app/(inventory)/products/page.js",
+  "/(inventory)/ledger-entries/page": "app/(inventory)/ledger-entries/page.js",
+  "/(inventory)/coa-detail/page": "app/(inventory)/coa-detail/page.js"
 }

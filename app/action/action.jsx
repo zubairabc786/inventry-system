@@ -12,7 +12,8 @@ const COASchema = z.object({
   contact_no: z.coerce.number(),
   address: z.string(),
 });
-// Create Chart of Account Page
+////////////  Create Chart of Account Page
+
 export async function lastCOA() {
   const lastAccount = await prisma.COA.findFirst({
     orderBy: {
@@ -49,14 +50,40 @@ export async function createCOA(formData) {
   return { success: true, result };
 }
 
-//// Get Chart of Account Details page
-export async function CoaDetail() {
-  const coa = await prisma.COA.findMany();
-  if (!coa) {
-    return notFound();
+export async function getCOAs() {
+  const accounts = await prisma.COA.findMany({
+    orderBy: {
+      account_code: "asc",
+    },
+  });
+  return accounts;
+}
+
+export async function updateCOA(formData) {
+  const parsed = COASchema.safeParse({
+    account_code: formData.get("account_code"),
+    account_name: formData.get("account_name"),
+    contact_no: formData.get("contact_no"),
+    address: formData.get("address"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.flatten() };
   }
 
-  return coa;
+  const result = await prisma?.COA.update({
+    where: { account_code: parsed.data.account_code },
+    data: parsed.data,
+  });
+
+  return { success: true, result };
+}
+
+export async function deleteCOA(account_code) {
+  const result = await prisma?.COA.delete({
+    where: { account_code },
+  });
+  return { success: true, result };
 }
 
 //////// Save Sale and customer List
@@ -130,6 +157,65 @@ export async function getProducts() {
   }
   // console.log(products);
   return products;
+}
+
+////////////// Update And Delete Product
+
+export async function updateProduct(formData) {
+  try {
+    const productData = {
+      product_name: formData.get("product_name"),
+      product_type: formData.get("product_type"),
+      purchase_price: parseFloat(formData.get("purchase_price")),
+      prophit_percent: parseFloat(formData.get("prophit_percent")),
+      price: parseFloat(formData.get("price")),
+    };
+
+    if (
+      isNaN(productData.purchase_price) ||
+      isNaN(productData.prophit_percent) ||
+      isNaN(productData.price)
+    ) {
+      throw new Error("Invalid numeric values in form data");
+    }
+
+    const productCode = formData.get("product_code");
+    const updatedProduct = await prisma.Product.update({
+      where: { product_code: productCode },
+      data: productData,
+    });
+
+    return {
+      success: true,
+      message: "Product updated successfully!",
+      product: updatedProduct,
+    };
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to update product",
+    };
+  }
+}
+
+export async function deleteProduct(productCode) {
+  try {
+    await prisma.Product.delete({
+      where: { product_code: productCode },
+    });
+
+    return {
+      success: true,
+      message: "Product deleted successfully!",
+    };
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return {
+      success: false,
+      message: error.message || "Failed to delete product",
+    };
+  }
 }
 
 ////////////////// Inventry Master and PurchaseSheet Table
