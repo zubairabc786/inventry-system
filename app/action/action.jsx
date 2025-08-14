@@ -1236,7 +1236,7 @@ export async function getDashboardData() {
 
 export async function getStockTableLessFive() {
   try {
-    const [purchases, sales] = await Promise.all([
+    const [purchases, sales, saleReturns, purchaseReturns] = await Promise.all([
       prisma.Purchase.groupBy({
         by: ["product_code"],
         where: { doc_type: "PV" },
@@ -1247,11 +1247,33 @@ export async function getStockTableLessFive() {
         where: { doc_type: "SV" },
         _sum: { quantity: true },
       }),
+      prisma.Purchase.groupBy({
+        by: ["product_code"],
+        where: { doc_type: "SR" },
+        _sum: { quantity: true },
+      }),
+      prisma.Purchase.groupBy({
+        by: ["product_code"],
+        where: { doc_type: "PR" },
+        _sum: { quantity: true },
+      }),
     ]);
 
+    // Create maps for each transaction type
     const salesMap = {};
+    const saleReturnsMap = {};
+    const purchaseReturnsMap = {};
+
     sales.forEach((s) => {
       salesMap[s.product_code] = s._sum.quantity || 0;
+    });
+
+    saleReturns.forEach((sr) => {
+      saleReturnsMap[sr.product_code] = sr._sum.quantity || 0;
+    });
+
+    purchaseReturns.forEach((pr) => {
+      purchaseReturnsMap[pr.product_code] = pr._sum.quantity || 0;
     });
 
     const stockData = await Promise.all(
@@ -1262,7 +1284,12 @@ export async function getStockTableLessFive() {
 
         const purchaseQty = p._sum.quantity || 0;
         const saleQty = salesMap[p.product_code] || 0;
-        const stockQty = purchaseQty - saleQty;
+        const saleReturnQty = saleReturnsMap[p.product_code] || 0;
+        const purchaseReturnQty = purchaseReturnsMap[p.product_code] || 0;
+
+        // Calculate stock: purchases - sales + sale returns - purchase returns
+        const stockQty =
+          purchaseQty - saleQty + saleReturnQty - purchaseReturnQty;
 
         return stockQty < 5
           ? {
@@ -1281,7 +1308,6 @@ export async function getStockTableLessFive() {
     return []; // Return empty array as fallback
   }
 }
-
 ////////////// Create User for login
 
 export async function createUser(formData) {

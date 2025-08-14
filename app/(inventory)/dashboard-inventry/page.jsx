@@ -6,7 +6,7 @@ import { getStockTableLessFive } from "../../action/action";
 import Loading from "../components/Loading";
 
 async function DashboardContent() {
-  const { sale, purchase, product } = await getDashboardData();
+  const { sale, product } = await getDashboardData();
   const stocks = await getStockTableLessFive();
 
   return (
