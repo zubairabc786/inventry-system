@@ -73,7 +73,7 @@ export default function SearchablePurchaseReturn({ invents }) {
               </div>
               <div className="flex gap-3 h-12">
                 <Link
-                  href={`/sale-edit/${invent.doc_id}`}
+                  href={`/purchase-return-edit/${invent.doc_id}`}
                   className="p-2 bg-blue-700 text-white rounded"
                 >
                   Update Purchase Return

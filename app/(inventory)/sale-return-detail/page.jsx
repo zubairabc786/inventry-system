@@ -14,7 +14,7 @@ export default async function InventPage() {
       <SearchSaleReturn invents={invents} />
       <div className="flex justify-center mt-4 bg-blue-900">
         <Link href="/sale-return" className="text-white p-2">
-          Go To Sale Return Sheet
+          Go To Sale Return
         </Link>
       </div>
     </div>

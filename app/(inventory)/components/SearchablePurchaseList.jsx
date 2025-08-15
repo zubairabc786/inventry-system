@@ -73,17 +73,17 @@ export default function SearchablePurchaseList({ invents }) {
               </div>
               <div className="flex gap-3 h-12">
                 <Link
-                  href={`/sale-edit/${invent.doc_id}`}
+                  href={`/purchase-edit/${invent.doc_id}`}
                   className="p-2 bg-blue-700 text-white rounded"
                 >
-                  Update Sale
+                  Update Purchase
                 </Link>
                 <DeletePurchase doc_id={invent.doc_id} Sale={"Purchase"} />
               </div>
             </div>
             <div className="mt-2">
               <h2 className="font-bold text-xl text-blue-600 underline">
-                Sales:-
+                Purchase:-
               </h2>
               <div className="grid grid-cols-5 text-green-500">
                 <label className="font-bold">Product Name</label>

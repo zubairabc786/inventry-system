@@ -73,12 +73,12 @@ export default function SearchableSaleReturn({ invents }) {
               </div>
               <div className="flex gap-3 h-12">
                 <Link
-                  href={`/sale-edit/${invent.doc_id}`}
+                  href={`/sale-return-edit/${invent.doc_id}`}
                   className="p-2 bg-blue-700 text-white rounded"
                 >
-                  Update Sale
+                  Update Sale Return
                 </Link>
-                <DeletePurchase doc_id={invent.doc_id} Sale={"Purchase"} />
+                <DeletePurchase doc_id={invent.doc_id} Sale={"Sale Return"} />
               </div>
             </div>
             <div className="mt-2">

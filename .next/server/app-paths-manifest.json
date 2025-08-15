@@ -1,1 +1,8 @@
-{}
+{
+  "/(inventory)/purchase-return-detail/page": "app/(inventory)/purchase-return-detail/page.js",
+  "/(inventory)/purchase-return-edit/[doc_id]/page": "app/(inventory)/purchase-return-edit/[doc_id]/page.js",
+  "/(inventory)/sale-return-detail/page": "app/(inventory)/sale-return-detail/page.js",
+  "/(inventory)/sale-return/page": "app/(inventory)/sale-return/page.js",
+  "/(inventory)/sale-return-edit/[doc_id]/page": "app/(inventory)/sale-return-edit/[doc_id]/page.js",
+  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js"
+}
