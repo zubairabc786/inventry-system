@@ -1,11 +1,1 @@
-{
-  "/(inventory)/stock-detail/page": "app/(inventory)/stock-detail/page.js",
-  "/(inventory)/sale-return/page": "app/(inventory)/sale-return/page.js",
-  "/(inventory)/sale-return-detail/page": "app/(inventory)/sale-return-detail/page.js",
-  "/(inventory)/purchase-return/page": "app/(inventory)/purchase-return/page.js",
-  "/(inventory)/purchase-return-detail/page": "app/(inventory)/purchase-return-detail/page.js",
-  "/(inventory)/sale-sheet/page": "app/(inventory)/sale-sheet/page.js",
-  "/(inventory)/products/page": "app/(inventory)/products/page.js",
-  "/(inventory)/coa/page": "app/(inventory)/coa/page.js",
-  "/(inventory)/dashboard-inventry/page": "app/(inventory)/dashboard-inventry/page.js"
-}
+{}
