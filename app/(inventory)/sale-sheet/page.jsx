@@ -1,12 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { createPurchaseSheet, getDropdownData } from "../../action/action";
 import Link from "next/link";
+import ProductList from "../components/ProductList";
+import COAList from "../components/COAList";
 
 export default function SalePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [coaList, setCoaList] = useState([]);
   const [productList, setProductList] = useState([]);
+  const [product, setProduct] = useState([]);
   const [items, setItems] = useState([
     {
       product_code: "",
@@ -19,6 +22,10 @@ export default function SalePage() {
   const [dated, setDated] = useState(new Date().toISOString().split("T")[0]);
   const [purchase_code, setPurchaseCode] = useState("");
 
+  const handleProductValue = (value) => {
+    console.log("value", value);
+    setProduct(value);
+  };
   useEffect(() => {
     getDropdownData().then(({ coaList, productList }) => {
       setCoaList(coaList);
@@ -26,7 +33,7 @@ export default function SalePage() {
     });
   }, []);
 
-  function addItem() {
+  const addItem = useCallback(() => {
     setItems([
       ...items,
       {
@@ -37,7 +44,23 @@ export default function SalePage() {
         discount: { type: "percentage", value: 0 },
       },
     ]);
-  }
+  }, [items]);
+
+  // Add keyboard event listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "F9") {
+        e.preventDefault(); // Prevent default browser behavior for F9
+        addItem();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [addItem]);
 
   function removeItem(index) {
     const newItems = items.filter((_, i) => i !== index);
@@ -150,21 +173,17 @@ export default function SalePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Purchase Code:
-          </label>
-          <select
-            onChange={(e) => setPurchaseCode(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white text-gray-700 shadow-sm"
-            value={purchase_code}
-          >
-            <option value="">Select Purchase Code</option>
-            {coaList.map((c) => (
-              <option key={c.account_code} value={c.account_code}>
-                {c.account_code} - {c.account_name}
-              </option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Account:
+            </label>
+            <COAList
+              coaList={coaList}
+              onAccountSelect={(account) =>
+                setPurchaseCode(account.account_code)
+              }
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -238,20 +257,15 @@ export default function SalePage() {
               {items.map((item, i) => (
                 <tr key={i} className="hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <select
-                      value={item.product_code}
-                      onChange={(e) =>
-                        updateItem(i, "product_code", e.target.value)
-                      }
-                      className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                    >
-                      <option value="">Select Product</option>
-                      {productList.map((p) => (
-                        <option key={p.product_code} value={p.product_code}>
-                          {p.product_code} - {p.product_name}
-                        </option>
-                      ))}
-                    </select>
+                    <ProductList
+                      handleProductValue={(product) => {
+                        updateItem(i, "product_code", product.product_code);
+                        // updateItem(i, "price", product.price || 0);
+                      }}
+                      productList={productList}
+                      index={i}
+                      updateItem={updateItem}
+                    />
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <input
