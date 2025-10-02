@@ -1,9 +1,14 @@
 {
   "pages": {
-    "/page": [
+    "/(inventory)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/(inventory)/layout.js"
+    ],
+    "/(inventory)/balance-sheet/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(inventory)/balance-sheet/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -11,50 +16,15 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/login/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/login/page.js"
-    ],
-    "/(inventory)/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/layout.js"
-    ],
     "/(inventory)/dashboard-inventry/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(inventory)/dashboard-inventry/page.js"
     ],
-    "/(inventory)/sale-sheet/page": [
+    "/(inventory)/purchase-detail/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/sale-sheet/page.js"
-    ],
-    "/(inventory)/sale-return/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/sale-return/page.js"
-    ],
-    "/(inventory)/sale-detail/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/sale-detail/page.js"
-    ],
-    "/(inventory)/ledger-entries/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/ledger-entries/page.js"
-    ],
-    "/(inventory)/trial-balance/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/trial-balance/page.js"
-    ],
-    "/(inventory)/coa/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/coa/page.js"
+      "static/chunks/app/(inventory)/purchase-detail/page.js"
     ]
   }
 }

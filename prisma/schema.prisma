@@ -1,7 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  // output   = "../app/generated/prisma"
-// previewFeatures = ["mongodb"]
 }
 
 
@@ -25,10 +23,15 @@ model InventMaster{
   id String @id @default(auto()) @map("_id") @db.ObjectId
   invoice_no Int 
   doc_id Int @unique
+  bill_amount Float
+  sale_man String
+  cash Float?
+  jazz_cash Float?
+  doc_type String 
+  dated DateTime
   COA  COA @relation(fields: [purchase_code],references: [account_code])
   purchase_code String      /////// account_code from coa table
-  dated DateTime
-  doc_type String 
+  purchase_or_sale_account String
   createdAt   DateTime @default(now())
 updatedAt   DateTime @updatedAt
 Purchase Purchase[]
@@ -36,10 +39,6 @@ Purchase Purchase[]
 
 model Purchase {
   id String @id @default(auto()) @map("_id") @db.ObjectId
-  InventMaster InventMaster? @relation(fields: [doc_id],references: [doc_id])
-  doc_id Int  //////// take from Invent_Master doc_id
-  Product Product @relation(fields: [product_code],references: [product_code])
-  product_code String  //////// take from product_code
   quantity Float
   doc_type String 
   price Float
@@ -47,10 +46,13 @@ model Purchase {
   remarks String ////////  for extra details
   total_qty Int
   total_item Int
-  grandTotal Int
   calculated_discount Float @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt    
+  Product Product @relation(fields: [product_code],references: [product_code])
+  product_code String  //////// take from product_code
+  InventMaster InventMaster? @relation(fields: [doc_id],references: [doc_id])
+  doc_id Int  //////// take from Invent_Master doc_id
 }
 
 model COA {
@@ -58,6 +60,8 @@ id  String  @id @default(auto()) @map("_id") @db.ObjectId
 account_code String @unique
 account_name String
 contact_no Int
+city String
+account_nature String
 address String
 createdAt   DateTime @default(now())
 updatedAt   DateTime @updatedAt
@@ -69,6 +73,7 @@ model Product {
   id  String  @id @default(auto()) @map("_id") @db.ObjectId
   product_code String @unique ///// 1001 example
   product_name  String
+  design_number String?
   product_type String      ////// unit of measurement Kg,gm,ltr etc
   sku String @unique
   purchase_price Float
@@ -91,7 +96,7 @@ model JornalMst {
   updatedAt DateTime @updatedAt
   JornalDtl JornalDtl[]
 }
-
+ 
 
 model JornalDtl {
   id  String  @id @default(auto()) @map("_id") @db.ObjectId

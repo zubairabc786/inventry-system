@@ -85,10 +85,10 @@ export default function COAPage() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 p-4">
+    <div className="w-full mx-auto flex flex-col md:flex-row gap-4 p-4">
       {/* Form on the left side */}
-      <div className="w-full md:w-1/3">
-        <div className="max-w-md mx-auto mt-10 p-4 border-3 border-white outline outline-1 outline-gray-200 shadow-lg rounded-xl">
+      <div className=" w-1/4">
+        <div className=" mx-auto mt-10 p-4 border-3 border-white outline outline-1 outline-gray-200 shadow-lg rounded-xl">
           <h1 className="text-4xl md:text-2xl lg:text-5xl font-extrabold tracking-tight text-center animate-fade-in animate-color-shift">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-green-500 to-purple-500">
               {isEditing ? "Edit Account" : "Create Account"}
@@ -121,6 +121,20 @@ export default function COAPage() {
               className="border p-2 w-full"
               required
               defaultValue={selectedAccount?.contact_no || ""}
+            />
+            <input
+              name="city"
+              placeholder="City"
+              className="border p-2 w-full"
+              required
+              defaultValue={selectedAccount?.city || ""}
+            />
+            <input
+              name="account_nature"
+              placeholder="Account Nature"
+              className="border p-2 w-full"
+              required
+              defaultValue={selectedAccount?.account_nature || ""}
             />
             <input
               name="address"
@@ -156,8 +170,8 @@ export default function COAPage() {
       </div>
 
       {/* Account details on the right side */}
-      <div className="w-full md:w-2/3">
-        <div className="max-w-4xl mx-auto mt-10 p-4 border-3 border-white outline outline-1 outline-gray-200 shadow-lg rounded-xl">
+      <div className=" w-3/4">
+        <div className=" mx-auto mt-10 p-4 border-3 border-white outline outline-1 outline-gray-200 shadow-lg rounded-xl">
           <h1 className="text-4xl md:text-2xl lg:text-5xl font-extrabold tracking-tight text-center animate-fade-in animate-color-shift">
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 via-pink-500 to-red-500">
               Account Details
@@ -172,7 +186,13 @@ export default function COAPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Account Code
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      City
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Contact
@@ -189,7 +209,13 @@ export default function COAPage() {
                   {accounts.map((account) => (
                     <tr key={account.account_code}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {account.account_code}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {account.account_name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {account.city}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {account.contact_no}
