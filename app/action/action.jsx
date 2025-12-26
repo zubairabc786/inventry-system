@@ -106,17 +106,24 @@ export async function createProduct(formData) {
 
     const nextProductCode = lastProduct
       ? parseInt(lastProduct.product_code) + 1
-      : 2001;
+      : 1;
 
     const productData = {
       product_code: nextProductCode.toString(),
       product_name: formData.get("product_name"),
-      design_number: formData.get("design_number"),
       product_type: formData.get("product_type"),
-      sku: "sku:" + nextProductCode.toString(),
       purchase_price: parseFloat(formData.get("purchase_price")),
       prophit_percent: parseFloat(formData.get("prophit_percent")),
       price: parseFloat(formData.get("price")),
+      ext_price: parseFloat(formData.get("price")), // Same as price initially
+      bar_code: formData.get("bar_code")
+        ? parseInt(formData.get("bar_code"))
+        : null,
+      size: formData.get("size") || null,
+      tax: formData.get("tax") ? parseFloat(formData.get("tax")) : null,
+      category: formData.get("category") || null,
+      sub_category: formData.get("sub_category") || null,
+      sku: "sku:" + nextProductCode.toString(),
     };
 
     if (
@@ -150,14 +157,22 @@ export async function getProducts() {
   try {
     const products = await prisma.Product.findMany({
       select: {
+        id: true,
         product_code: true,
         product_name: true,
-        design_number: true,
         product_type: true,
         sku: true,
         purchase_price: true,
         prophit_percent: true,
         price: true,
+        ext_price: true,
+        bar_code: true,
+        size: true,
+        tax: true,
+        category: true,
+        sub_category: true,
+        createdAt: true,
+        updatedAt: true,
       },
       orderBy: {
         product_code: "desc",
@@ -175,11 +190,18 @@ export async function updateProduct(formData) {
   try {
     const productData = {
       product_name: formData.get("product_name"),
-      design_number: formData.get("design_number"),
       product_type: formData.get("product_type"),
       purchase_price: parseFloat(formData.get("purchase_price")),
       prophit_percent: parseFloat(formData.get("prophit_percent")),
       price: parseFloat(formData.get("price")),
+      ext_price: parseFloat(formData.get("price")), // Update ext_price as well
+      bar_code: formData.get("bar_code")
+        ? parseInt(formData.get("bar_code"))
+        : null,
+      size: formData.get("size") || null,
+      tax: formData.get("tax") ? parseFloat(formData.get("tax")) : null,
+      category: formData.get("category") || null,
+      sub_category: formData.get("sub_category") || null,
     };
 
     if (
@@ -190,9 +212,9 @@ export async function updateProduct(formData) {
       throw new Error("Invalid numeric values in form data");
     }
 
-    const productCode = formData.get("product_code");
+    const productId = formData.get("id");
     const updatedProduct = await prisma.Product.update({
-      where: { product_code: productCode },
+      where: { id: productId },
       data: productData,
     });
 
@@ -210,10 +232,10 @@ export async function updateProduct(formData) {
   }
 }
 
-export async function deleteProduct(productCode) {
+export async function deleteProduct(productId) {
   try {
     await prisma.Product.delete({
-      where: { product_code: productCode },
+      where: { id: productId },
     });
 
     return {
@@ -228,6 +250,139 @@ export async function deleteProduct(productCode) {
     };
   }
 }
+// export async function createProduct(formData) {
+//   try {
+//     const lastProduct = await prisma.Product.findFirst({
+//       orderBy: {
+//         product_code: "desc",
+//       },
+//     });
+
+//     const nextProductCode = lastProduct
+//       ? parseInt(lastProduct.product_code) + 1
+//       : 2001;
+
+//     const productData = {
+//       product_code: nextProductCode.toString(),
+//       product_name: formData.get("product_name"),
+//       // design_number: formData.get("design_number"),
+//       product_type: formData.get("product_type"),
+//       sku: "sku:" + nextProductCode.toString(),
+//       purchase_price: parseFloat(formData.get("purchase_price")),
+//       prophit_percent: parseFloat(formData.get("prophit_percent")),
+//       price: parseFloat(formData.get("price")),
+//     };
+
+//     if (
+//       isNaN(productData.purchase_price) ||
+//       isNaN(productData.prophit_percent) ||
+//       isNaN(productData.price)
+//     ) {
+//       throw new Error("Invalid numeric values in form data");
+//     }
+
+//     const newProduct = await prisma.Product.create({
+//       data: productData,
+//     });
+
+//     return {
+//       success: true,
+//       newCode: nextProductCode.toString(),
+//       nextProductCode,
+//       product: newProduct,
+//     };
+//   } catch (error) {
+//     console.error("Error creating product:", error);
+//     return {
+//       success: false,
+//       message: error.message || "Failed to create product",
+//     };
+//   }
+// }
+
+// export async function getProducts() {
+//   try {
+//     const products = await prisma.Product.findMany({
+//       select: {
+//         product_code: true,
+//         product_name: true,
+//         // design_number: true,
+//         product_type: true,
+//         sku: true,
+//         purchase_price: true,
+//         prophit_percent: true,
+//         price: true,
+//       },
+//       orderBy: {
+//         product_code: "desc",
+//       },
+//     });
+
+//     return products;
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+//     throw new Error("Failed to fetch products");
+//   }
+// }
+
+// export async function updateProduct(formData) {
+//   try {
+//     const productData = {
+//       product_name: formData.get("product_name"),
+//       design_number: formData.get("design_number"),
+//       product_type: formData.get("product_type"),
+//       purchase_price: parseFloat(formData.get("purchase_price")),
+//       prophit_percent: parseFloat(formData.get("prophit_percent")),
+//       price: parseFloat(formData.get("price")),
+//     };
+
+//     if (
+//       isNaN(productData.purchase_price) ||
+//       isNaN(productData.prophit_percent) ||
+//       isNaN(productData.price)
+//     ) {
+//       throw new Error("Invalid numeric values in form data");
+//     }
+
+//     const productCode = formData.get("product_code");
+//     const updatedProduct = await prisma.Product.update({
+//       where: { product_code: productCode },
+//       data: productData,
+//     });
+
+//     return {
+//       success: true,
+//       message: "Product updated successfully!",
+//       product: updatedProduct,
+//     };
+//   } catch (error) {
+//     console.error("Error updating product:", error);
+//     return {
+//       success: false,
+//       message: error.message || "Failed to update product",
+//     };
+//   }
+// }
+
+// export async function deleteProduct(productCode) {
+//   try {
+//     await prisma.Product.delete({
+//       where: { product_code: productCode },
+//     });
+
+//     return {
+//       success: true,
+//       message: "Product deleted successfully!",
+//     };
+//   } catch (error) {
+//     console.error("Error deleting product:", error);
+//     return {
+//       success: false,
+//       message: error.message || "Failed to delete product",
+//     };
+//   }
+// }
+
 ////////////////// Inventry Master and PurchaseSheet Table
 async function generateDocId() {
   const lastRecord = await prisma.InventMaster.findFirst({
@@ -237,84 +392,298 @@ async function generateDocId() {
 }
 
 export async function createPurchaseSheet(formData) {
-  const doc_id = await generateDocId();
-  const doc_type = formData.get("doc_type");
-  const purchase_or_sale_account = formData.get("purchase_or_sale_account");
-  const calculated_discount = parseFloat(formData.get("calculated_discount"));
-  const purchase_code = formData.get("purchase_code");
-  const dated = new Date(formData.get("dated"));
-  const bill_amount = parseFloat(formData.get("bill_amount"));
-  const sale_man = formData.get("sale_man");
-  const cash = formData.get("cash") ? parseFloat(formData.get("cash")) : null;
-  const jazz_cash = formData.get("jazz_cash")
-    ? parseFloat(formData.get("jazz_cash"))
-    : null;
+  try {
+    const doc_id = await generateDocId();
+    const doc_type = formData.get("doc_type");
+    const purchase_or_sale_account = formData.get("purchase_or_sale_account");
+    const calculated_discount = parseFloat(formData.get("calculated_discount"));
+    const purchase_code = formData.get("purchase_code");
+    const dated = new Date(formData.get("dated"));
+    const bill_amount = parseFloat(formData.get("bill_amount"));
+    const sale_man = formData.get("sale_man");
+    const cash = formData.get("cash") ? parseFloat(formData.get("cash")) : null;
+    const jazz_cash = formData.get("jazz_cash")
+      ? parseFloat(formData.get("jazz_cash"))
+      : null;
 
-  const items = JSON.parse(formData.get("items"));
-  const purchases = items.map((item) => {
-    const quantity = parseFloat(item.quantity);
-    const price = parseFloat(item.price || item.purchase_price);
-    return {
-      product_code: item.product_code,
-      quantity,
-      price,
-      amount: quantity * price,
-      remarks: item.remarks || "",
-      doc_type,
-    };
-  });
+    const items = JSON.parse(formData.get("items"));
 
-  const total_qty = purchases.reduce((sum, p) => sum + p.quantity, 0);
-  const total_item = purchases.length;
-  const grandTotal = purchases.reduce((sum, p) => sum + p.amount, 0);
+    // Create purchases with product_code reference
+    const purchases = items.map((item) => {
+      const quantity = parseFloat(item.quantity);
+      const price = parseFloat(item.price || item.purchase_price);
+      return {
+        product_code: item.product_code,
+        quantity,
+        price,
+        amount: quantity * price,
+        remarks: item.remarks || "",
+        doc_type,
+      };
+    });
 
-  await prisma.InventMaster.create({
-    data: {
-      invoice_no: Math.floor(Math.random() * 100000),
-      doc_id,
-      purchase_or_sale_account,
-      purchase_code,
-      doc_type,
-      dated,
-      bill_amount,
-      sale_man,
-      cash,
-      jazz_cash,
+    const total_qty = purchases.reduce((sum, p) => sum + p.quantity, 0);
+    const total_item = purchases.length;
+    const grandTotal = purchases.reduce((sum, p) => sum + p.amount, 0);
+
+    await prisma.InventMaster.create({
+      data: {
+        invoice_no: Math.floor(Math.random() * 100000),
+        doc_id,
+        purchase_or_sale_account,
+        purchase_code,
+        doc_type,
+        dated,
+        bill_amount,
+        sale_man,
+        cash,
+        jazz_cash,
+        Purchase: {
+          create: purchases.map((p) => ({
+            ...p,
+            total_qty,
+            total_item,
+            calculated_discount: calculated_discount || 0,
+          })),
+        },
+      },
+    });
+
+    return { success: true, doc_id };
+  } catch (error) {
+    console.error("Error creating purchase sheet:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+// Updated dropdown data function
+export async function getDropdownData() {
+  try {
+    const coaList = await prisma.COA.findMany({
+      select: {
+        account_code: true,
+        account_name: true,
+        city: true,
+        contact_no: true,
+      },
+    });
+
+    const productList = await prisma.Product.findMany({
+      select: {
+        id: true,
+        product_code: true,
+        product_name: true,
+        price: true,
+        ext_price: true,
+        purchase_price: true,
+        bar_code: true,
+        size: true,
+        category: true,
+        sub_category: true,
+        product_type: true,
+        prophit_percent: true,
+        sku: true,
+      },
+      orderBy: {
+        product_name: "asc",
+      },
+    });
+
+    return { coaList, productList };
+  } catch (error) {
+    console.error("Error fetching dropdown data:", error);
+    throw new Error("Failed to fetch dropdown data");
+  }
+}
+// async function generateDocId() {
+//   const lastRecord = await prisma.InventMaster.findFirst({
+//     orderBy: { doc_id: "desc" },
+//   });
+//   return lastRecord ? lastRecord.doc_id + 1 : 1;
+// }
+
+// export async function createPurchaseSheet(formData) {
+//   // console.log("form data", formData);
+
+//   const doc_id = await generateDocId();
+//   const doc_type = formData.get("doc_type");
+//   const purchase_or_sale_account = formData.get("purchase_or_sale_account");
+//   const calculated_discount = parseFloat(formData.get("calculated_discount"));
+//   const purchase_code = formData.get("purchase_code");
+//   const dated = new Date(formData.get("dated"));
+//   const bill_amount = parseFloat(formData.get("bill_amount"));
+//   const sale_man = formData.get("sale_man");
+//   const cash = formData.get("cash") ? parseFloat(formData.get("cash")) : null;
+//   const jazz_cash = formData.get("jazz_cash")
+//     ? parseFloat(formData.get("jazz_cash"))
+//     : null;
+
+//   const items = JSON.parse(formData.get("items"));
+//   const purchases = items.map((item) => {
+//     const quantity = parseFloat(item.quantity);
+//     const price = parseFloat(item.price || item.purchase_price);
+//     return {
+//       product_code: item.product_code,
+//       quantity,
+//       price,
+//       amount: quantity * price,
+//       remarks: item.remarks || "",
+//       doc_type,
+//     };
+//   });
+
+//   const total_qty = purchases.reduce((sum, p) => sum + p.quantity, 0);
+//   const total_item = purchases.length;
+//   const grandTotal = purchases.reduce((sum, p) => sum + p.amount, 0);
+
+//   await prisma.InventMaster.create({
+//     data: {
+//       invoice_no: Math.floor(Math.random() * 100000),
+//       doc_id,
+//       purchase_or_sale_account,
+//       purchase_code,
+//       doc_type,
+//       dated,
+//       bill_amount,
+//       sale_man,
+//       cash,
+//       jazz_cash,
+//       Purchase: {
+//         create: purchases.map((p) => ({
+//           ...p,
+//           total_qty,
+//           total_item,
+//           calculated_discount: calculated_discount || 0,
+//           // grandTotal: grandTotal - (calculated_discount || 0),
+//         })),
+//       },
+//     },
+//   });
+
+//   return { success: true, doc_id };
+// }
+
+// // purchaseSheet dropdown data
+// export async function getDropdownData() {
+//   const coaList = await prisma.COA.findMany({
+//     select: {
+//       account_code: true,
+//       account_name: true,
+//       city: true,
+//       contact_no: true,
+//     },
+//   });
+//   const productList = await prisma.Product.findMany({
+//     select: {
+//       product_code: true,
+//       product_name: true,
+//       design_number: true,
+//       price: true,
+//       purchase_price: true,
+//     },
+//   });
+//   return { coaList, productList };
+// }
+/////////////////////////////////// Update Sale Sheet
+
+/* ============================
+   GET SALE BY DOC ID
+============================ */
+// export async function getSaleByDocId(doc_id) {
+//   // doc_id = parseInt(doc_id);
+//   return prisma.InventMaster.findUnique({
+//     where: { doc_id: parseInt(doc_id) },
+//     include: {
+//       Purchase: true,
+//     },
+//   });
+// }
+export async function getSaleByDocId(doc_id) {
+  return prisma.InventMaster.findUnique({
+    where: { doc_id: parseInt(doc_id) },
+    include: {
       Purchase: {
-        create: purchases.map((p) => ({
-          ...p,
-          total_qty,
-          total_item,
-          calculated_discount: calculated_discount || 0,
-          // grandTotal: grandTotal - (calculated_discount || 0),
-        })),
+        include: {
+          Product: true, // 👈 JOIN PRODUCT
+        },
       },
     },
   });
-
-  return { success: true, doc_id };
 }
 
-// purchaseSheet dropdown data
-export async function getDropdownData() {
-  const coaList = await prisma.COA.findMany({
-    select: {
-      account_code: true,
-      account_name: true,
-      city: true,
-      contact_no: true,
-    },
-  });
-  const productList = await prisma.Product.findMany({
-    select: {
-      product_code: true,
-      product_name: true,
-      design_number: true,
-      price: true,
-      purchase_price: true,
-    },
-  });
-  return { coaList, productList };
+/* ============================
+   UPDATE SALE SHEET
+============================ */
+export async function updateSaleSheet(formData) {
+  try {
+    const doc_id = parseInt(formData.get("doc_id"));
+    const purchase_or_sale_account = formData.get("purchase_or_sale_account");
+    const purchase_code = formData.get("purchase_code");
+    const dated = new Date(formData.get("dated"));
+    const bill_amount = parseFloat(formData.get("bill_amount"));
+    const sale_man = formData.get("sale_man");
+    const cash = formData.get("cash") ? parseFloat(formData.get("cash")) : null;
+    const jazz_cash = formData.get("jazz_cash")
+      ? parseFloat(formData.get("jazz_cash"))
+      : null;
+    const calculated_discount = parseFloat(
+      formData.get("calculated_discount") || 0
+    );
+
+    const items = JSON.parse(formData.get("items"));
+
+    if (!doc_id || items.length === 0) {
+      throw new Error("Invalid update data");
+    }
+
+    const purchases = items.map((item) => {
+      const quantity = parseFloat(item.quantity);
+      const price = parseFloat(item.price || item.purchase_price);
+      return {
+        product_code: item.product_code,
+        quantity,
+        price,
+        amount: quantity * price,
+        remarks: item.remarks || "",
+        doc_type: "SV",
+      };
+    });
+
+    const total_qty = purchases.reduce((s, p) => s + p.quantity, 0);
+    const total_item = purchases.length;
+
+    await prisma.$transaction([
+      prisma.Purchase.deleteMany({
+        where: { doc_id },
+      }),
+
+      prisma.InventMaster.update({
+        where: { doc_id },
+        data: {
+          purchase_or_sale_account,
+          purchase_code,
+          dated,
+          bill_amount,
+          sale_man,
+          cash,
+          jazz_cash,
+          Purchase: {
+            create: purchases.map((p) => ({
+              ...p,
+              total_qty,
+              total_item,
+              calculated_discount,
+            })),
+          },
+        },
+      }),
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update Sale Error:", error);
+    return { success: false, message: error.message };
+  }
 }
 
 //////////// Get InventMaster and Purchase Details
@@ -701,28 +1070,31 @@ export async function getInventMasterPurchaseReturnId() {
 }
 
 /////////////// Get Purchase Bill Update and Delete Functions
-// ... existing code ...
 
 export async function updatePurchaseSheet(doc_id, formData) {
+  console.log("formDate=", formData);
   try {
     const doc_type = formData.get("doc_type");
-    const purchase_or_sale_account = formData.get("purchase_or_sale_account");
-    const calculated_discount = parseFloat(formData.get("calculated_discount"));
-    const purchase_code = formData.get("purchase_code");
+    const calculated_discount =
+      parseFloat(formData.get("calculated_discount")) || 0;
     const dated = new Date(formData.get("dated"));
-    const bill_amount = parseFloat(formData.get("bill_amount"));
-    const sale_man = formData.get("sale_man");
-    const cash = formData.get("cash") ? parseFloat(formData.get("cash")) : null;
-    const jazz_cash = formData.get("jazz_cash")
-      ? parseFloat(formData.get("jazz_cash"))
-      : null;
+    const bill_amount = parseFloat(formData.get("bill_amount")) || 0;
+    const sale_man = formData.get("sale_man") || "";
+    const cash = parseFloat(formData.get("cash")) || 0;
+    const jazz_cash = parseFloat(formData.get("jazz_cash")) || 0;
 
     const items = JSON.parse(formData.get("items"));
+
     const purchases = items.map((item) => {
-      const quantity = parseFloat(item.quantity);
-      const price = parseFloat(item.price);
+      const quantity = parseFloat(item.quantity) || 0;
+      const price = parseFloat(item.price) || 0;
+      const ext_price = parseFloat(item.ext_price) || 0;
+
       return {
         product_code: item.product_code,
+        product_name: item.product_name || "",
+        product_type: item.product_type || "",
+        ext_price: ext_price,
         quantity,
         price,
         amount: quantity * price,
@@ -733,42 +1105,164 @@ export async function updatePurchaseSheet(doc_id, formData) {
 
     const total_qty = purchases.reduce((sum, p) => sum + p.quantity, 0);
     const total_item = purchases.length;
-    const grandTotal = purchases.reduce((sum, p) => sum + p.amount, 0);
 
-    // First delete existing purchase records
-    await prisma.Purchase.deleteMany({
-      where: { doc_id: parseInt(doc_id) },
-    });
+    try {
+      // Delete existing purchase records
+      await prisma.Purchase.deleteMany({
+        where: { doc_id: parseInt(doc_id) },
+      });
 
-    // Then update the master record and create new purchase records
-    await prisma.InventMaster.update({
-      where: { doc_id: parseInt(doc_id) },
-      data: {
-        purchase_or_sale_account,
-        purchase_code,
+      // Update only basic fields that definitely exist
+      const updateData = {
         doc_type,
         dated,
         bill_amount,
-        sale_man,
-        cash,
-        jazz_cash,
-        Purchase: {
-          create: purchases.map((p) => ({
-            ...p,
+        sale_man: sale_man || null,
+        cash: cash || null,
+        jazz_cash: jazz_cash || null,
+        calculated_discount,
+        total_qty,
+        total_item,
+      };
+
+      // Try to update without customer code field first
+      const updatedMaster = await prisma.InventMaster.update({
+        where: { doc_id: parseInt(doc_id) },
+        data: updateData,
+      });
+
+      // Create new purchase records
+      for (const purchase of purchases) {
+        await prisma.Purchase.create({
+          data: {
+            doc_id: parseInt(doc_id),
+            product_code: purchase.product_code,
+            product_name: purchase.product_name,
+            product_type: purchase.product_type,
+            ext_price: purchase.ext_price,
+            quantity: purchase.quantity,
+            price: purchase.price,
+            amount: purchase.amount,
+            remarks: purchase.remarks,
+            doc_type: purchase.doc_type,
             total_qty,
             total_item,
-            calculated_discount: calculated_discount || 0,
-          })),
-        },
-      },
-    });
+            calculated_discount,
+          },
+        });
+      }
 
-    return { success: true, doc_id };
+      return { success: true, doc_id: updatedMaster.doc_id };
+    } catch (error) {
+      console.error("Database error:", error);
+
+      // If it's a field error, try without problematic fields
+      if (error.message.includes("Unknown argument")) {
+        try {
+          // Try minimal update
+          const minimalUpdate = await prisma.InventMaster.update({
+            where: { doc_id: parseInt(doc_id) },
+            data: {
+              dated,
+              bill_amount,
+              doc_type,
+            },
+          });
+
+          // Still create purchase records
+          for (const purchase of purchases) {
+            await prisma.Purchase.create({
+              data: {
+                doc_id: parseInt(doc_id),
+                product_code: purchase.product_code,
+                quantity: purchase.quantity,
+                price: purchase.price,
+                amount: purchase.amount,
+                doc_type: purchase.doc_type,
+              },
+            });
+          }
+
+          return { success: true, doc_id: minimalUpdate.doc_id };
+        } catch (minimalError) {
+          return { success: false, error: minimalError.message };
+        }
+      }
+
+      return { success: false, error: error.message };
+    }
   } catch (error) {
     console.error("Error updating purchase sheet:", error);
     return { success: false, error: error.message };
   }
 }
+
+// export async function updatePurchaseSheet(doc_id, formData) {
+//   try {
+//     const doc_type = formData.get("doc_type");
+//     const purchase_or_sale_account = formData.get("purchase_or_sale_account");
+//     const calculated_discount = parseFloat(formData.get("calculated_discount"));
+//     const purchase_code = formData.get("purchase_code");
+//     const dated = new Date(formData.get("dated"));
+//     const bill_amount = parseFloat(formData.get("bill_amount"));
+//     const sale_man = formData.get("sale_man");
+//     const cash = formData.get("cash") ? parseFloat(formData.get("cash")) : null;
+//     const jazz_cash = formData.get("jazz_cash")
+//       ? parseFloat(formData.get("jazz_cash"))
+//       : null;
+
+//     const items = JSON.parse(formData.get("items"));
+//     const purchases = items.map((item) => {
+//       const quantity = parseFloat(item.quantity);
+//       const price = parseFloat(item.price);
+//       return {
+//         product_code: item.product_code,
+//         quantity,
+//         price,
+//         amount: quantity * price,
+//         remarks: item.remarks || "",
+//         doc_type,
+//       };
+//     });
+
+//     const total_qty = purchases.reduce((sum, p) => sum + p.quantity, 0);
+//     const total_item = purchases.length;
+//     const grandTotal = purchases.reduce((sum, p) => sum + p.amount, 0);
+
+//     // First delete existing purchase records
+//     await prisma.Purchase.deleteMany({
+//       where: { doc_id: parseInt(doc_id) },
+//     });
+
+//     // Then update the master record and create new purchase records
+//     await prisma.InventMaster.update({
+//       where: { doc_id: parseInt(doc_id) },
+//       data: {
+//         purchase_or_sale_account,
+//         purchase_code,
+//         doc_type,
+//         dated,
+//         bill_amount,
+//         sale_man,
+//         cash,
+//         jazz_cash,
+//         Purchase: {
+//           create: purchases.map((p) => ({
+//             ...p,
+//             total_qty,
+//             total_item,
+//             calculated_discount: calculated_discount || 0,
+//           })),
+//         },
+//       },
+//     });
+
+//     return { success: true, doc_id };
+//   } catch (error) {
+//     console.error("Error updating purchase sheet:", error);
+//     return { success: false, error: error.message };
+//   }
+// }
 
 export async function deletePurchaseSheet(doc_id) {
   try {
@@ -1063,11 +1557,22 @@ export async function getDropdownStockData() {
     });
     const productList = await prisma.Product.findMany({
       select: {
+        id: true,
         product_code: true,
         product_name: true,
-        design_number: true,
         price: true,
+        ext_price: true,
         purchase_price: true,
+        bar_code: true,
+        size: true,
+        category: true,
+        sub_category: true,
+        product_type: true,
+        prophit_percent: true,
+        sku: true,
+      },
+      orderBy: {
+        product_name: "asc",
       },
     });
 

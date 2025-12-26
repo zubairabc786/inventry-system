@@ -27,9 +27,9 @@ export default async function StockPage() {
                 <th className="px-6 py-4 text-left font-semibold uppercase tracking-wider rounded-tl-xl">
                   Item Name
                 </th>
-                <th className="px-6 py-4 text-left font-semibold uppercase tracking-wider ">
+                {/* <th className="px-6 py-4 text-left font-semibold uppercase tracking-wider ">
                   Design Number
-                </th>
+                </th> */}
                 <th className="px-6 py-4 text-left font-semibold uppercase tracking-wider">
                   Purchase
                 </th>
@@ -54,9 +54,9 @@ export default async function StockPage() {
                   <td className="px-6 py-4 whitespace-nowrap font-mono text-blue-600 dark:text-blue-400 text-lg font-bold">
                     {item.item_name}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-lg">
+                  {/* <td className="px-6 py-4 whitespace-nowrap text-lg">
                     {item.design_number}
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap text-green-600 dark:text-green-400 text-lg">
                     {item.Purchase}
                   </td>

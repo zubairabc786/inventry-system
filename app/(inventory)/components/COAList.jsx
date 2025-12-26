@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Popover,
   PopoverContent,
@@ -17,9 +17,27 @@ import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
 
-const COAList = ({ coaList, onAccountSelect }) => {
+const COAList = ({ coaList, onAccountSelect, value }) => {
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [open, setOpen] = useState(false);
+
+  // Sync with external value
+  useEffect(() => {
+    if (value) {
+      const account = coaList.find((acc) => acc.account_code === value);
+      if (account) {
+        setSelectedAccount(account);
+      }
+    } else {
+      setSelectedAccount(null);
+    }
+  }, [value, coaList]);
+
+  const handleSelect = (account) => {
+    setSelectedAccount(account);
+    onAccountSelect(account);
+    setOpen(false);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -31,7 +49,7 @@ const COAList = ({ coaList, onAccountSelect }) => {
           className="justify-between w-full"
         >
           {selectedAccount
-            ? `${selectedAccount.account_name}`
+            ? `${selectedAccount.account_name} (${selectedAccount.account_code})`
             : "Select account..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -46,11 +64,7 @@ const COAList = ({ coaList, onAccountSelect }) => {
                 <CommandItem
                   key={account.account_code}
                   value={account.account_name}
-                  onSelect={() => {
-                    setSelectedAccount(account);
-                    onAccountSelect(account);
-                    setOpen(false);
-                  }}
+                  onSelect={() => handleSelect(account)}
                 >
                   <Check
                     className={cn(
@@ -60,7 +74,7 @@ const COAList = ({ coaList, onAccountSelect }) => {
                         : "opacity-0"
                     )}
                   />
-                  {account.account_name}
+                  {account.account_name} ({account.account_code})
                 </CommandItem>
               ))}
             </CommandGroup>

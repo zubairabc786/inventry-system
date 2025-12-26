@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+  // url      = env("DATABASE_URL")
 }
 
 enum ROLE {
@@ -72,13 +72,18 @@ JornalDtl JornalDtl[]
 model Product {
   id  String  @id @default(auto()) @map("_id") @db.ObjectId
   product_code String @unique ///// 1001 example
+  price    Float
+  ext_price Float
+  bar_code Int?
+  size String?
   product_name  String
-  design_number String?
+  tax Float?
+  category String?
+  sub_category String?
   product_type String      ////// unit of measurement Kg,gm,ltr etc
-  sku String @unique
   purchase_price Float
   prophit_percent Float
-  price    Float
+  sku String @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   Purchase Purchase[]
