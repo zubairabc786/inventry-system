@@ -117,7 +117,7 @@ export default function COAPage() {
             <input
               name="contact_no"
               placeholder="Contact No"
-              type="number"
+              type="text"
               className="border p-2 w-full"
               required
               defaultValue={selectedAccount?.contact_no || ""}
@@ -186,7 +186,7 @@ export default function COAPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Account Code
+                      Acc_Code
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name

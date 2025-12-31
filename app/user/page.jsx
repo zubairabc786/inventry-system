@@ -15,6 +15,13 @@ const UserForm = () => {
           className="border w-1/2 p-2"
         />
         <input
+          type="text"
+          name="role"
+          required
+          placeholder="userRole"
+          className="border w-1/2 p-2"
+        />
+        <input
           type="password"
           name="password"
           required

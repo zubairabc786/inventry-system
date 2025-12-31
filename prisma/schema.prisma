@@ -16,6 +16,7 @@ enum ROLE {
 model User {
 id String @id @default(auto()) @map("_id") @db.ObjectId
 name String @unique
+role String
 password String
 }
 
@@ -116,3 +117,151 @@ model JornalDtl {
   createdAt  DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+////////////////////////////////////////////////// For SQLite ////////////////////////////////
+
+// datasource db {
+//   provider = "sqlite"
+//   url      = env("DATABASE_URL")  // Will be "file:./dev.db"
+// }
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// // Models need to be updated for SQLite compatibility
+
+// model User {
+//   id       Int     @id @default(autoincrement())  // Changed from String to Int for SQLite
+//   name     String  @unique
+//   role     String
+//   password String
+  
+//   @@map("users")  // Optional: Explicit table name mapping
+// }
+
+// model InventMaster {
+//   id                      Int     @id @default(autoincrement())
+//   invoice_no              Int
+//   doc_id                  Int     @unique
+//   bill_amount             Float
+//   sale_man                String
+//   cash                    Float?
+//   jazz_cash              Float?
+//   doc_type                String
+//   dated                   DateTime
+//   purchase_code           String
+//   purchase_or_sale_account String
+  
+//   // Relations
+//   COA         COA?       @relation(fields: [purchase_code], references: [account_code], onDelete: Cascade)
+//   Purchase    Purchase[]
+  
+//   createdAt   DateTime   @default(now())
+//   updatedAt   DateTime   @updatedAt
+  
+//   @@map("invent_master")  // Table name in SQLite
+// }
+
+// model Purchase {
+//   id                    Int     @id @default(autoincrement())
+//   quantity              Float
+//   doc_type              String
+//   price                 Float
+//   amount                Float
+//   remarks               String?
+//   total_qty             Int
+//   total_item            Int
+//   calculated_discount   Float   @default(0)
+//   product_code          String
+//   doc_id                Int
+  
+//   // Relations
+//   Product      Product      @relation(fields: [product_code], references: [product_code], onDelete: Cascade)
+//   InventMaster InventMaster? @relation(fields: [doc_id], references: [doc_id], onDelete: Cascade)
+  
+//   createdAt    DateTime    @default(now())
+//   updatedAt    DateTime    @updatedAt
+  
+//   @@map("purchase")
+// }
+
+// model COA {
+//   id             Int      @id @default(autoincrement())
+//   account_code   String   @unique
+//   account_name   String
+//   contact_no     String?   // Changed from Int to String for phone numbers
+//   city           String?
+//   account_nature String?
+//   address        String?
+  
+//   // Relations
+//   InventMaster InventMaster[]
+//   JornalDtl    JornalDtl[]
+  
+//   createdAt     DateTime  @default(now())
+//   updatedAt     DateTime  @updatedAt
+  
+//   @@map("coa")
+// }
+
+// model Product {
+//   id                Int      @id @default(autoincrement())
+//   product_code      String   @unique
+//   price             Float
+//   ext_price         Float
+//   bar_code          String?  // Changed from Int to String
+//   size              String?
+//   product_name      String
+//   tax               Float?
+//   category          String?
+//   sub_category      String?
+//   product_type      String
+//   purchase_price    Float
+//   prophit_percent   Float
+//   sku               String   @unique
+  
+//   // Relations
+//   Purchase Purchase[]
+  
+//   createdAt         DateTime @default(now())
+//   updatedAt         DateTime @updatedAt
+  
+//   @@map("products")
+// }
+
+// model JornalMst {
+//   id        Int      @id @default(autoincrement())
+//   doc_id    Int      @unique
+//   doc_type  String
+//   dated     DateTime
+//   remarks   String?
+  
+//   // Relations
+//   JornalDtl JornalDtl[]
+  
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+  
+//   @@map("jornal_mst")
+// }
+
+// model JornalDtl {
+//   id           Int      @id @default(autoincrement())
+//   doc_id       Int
+//   account_code String?
+//   doc_type     String
+//   debit        Float
+//   credit       Float
+//   remarks      String?
+  
+//   // Relations
+//   JornalMst JornalMst @relation(fields: [doc_id], references: [doc_id], onDelete: Cascade)
+//   COA       COA?      @relation(fields: [account_code], references: [account_code], onDelete: Cascade)
+  
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+  
+//   @@map("jornal_dtl")
+// }

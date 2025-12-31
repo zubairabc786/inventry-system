@@ -11,7 +11,7 @@ const COASchema = z.object({
   account_name: z.string(),
   city: z.string(),
   account_nature: z.string(),
-  contact_no: z.coerce.number(),
+  contact_no: z.coerce.string(),
   address: z.string(),
 });
 ////////////  Create Chart of Account Page
@@ -69,7 +69,7 @@ export async function updateCOA(formData) {
     account_name: formData.get("account_name"),
     city: formData.get("city"),
     account_nature: formData.get("account_nature"),
-    contact_no: formData.get("contact_no"),
+    contact_no: String(formData.get("contact_no")),
     address: formData.get("address"),
   });
 
@@ -116,9 +116,7 @@ export async function createProduct(formData) {
       prophit_percent: parseFloat(formData.get("prophit_percent")),
       price: parseFloat(formData.get("price")),
       ext_price: parseFloat(formData.get("price")), // Same as price initially
-      bar_code: formData.get("bar_code")
-        ? parseInt(formData.get("bar_code"))
-        : null,
+      bar_code: formData.get("bar_code") ? formData.get("bar_code") : null,
       size: formData.get("size") || null,
       tax: formData.get("tax") ? parseFloat(formData.get("tax")) : null,
       category: formData.get("category") || null,
@@ -3223,6 +3221,7 @@ export async function createUser(formData) {
   await prisma.User.create({
     data: {
       name: formData.get("name"),
+      role: formData.get("role"),
       password: await bcrypt.hash(formData.get("password"), 10),
     },
   });

@@ -5,8 +5,8 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "FoodieHub - Food Delivery App",
-  description: "Order your favorite food online",
+  title: "Accounts Projects",
+  description: "Accounts Projects",
 };
 
 export default function RootLayout({ children }) {
