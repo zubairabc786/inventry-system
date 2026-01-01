@@ -1,19 +1,17 @@
-// "use server";
-
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Allow login page ALWAYS
-  if (pathname === "/login") {
+  // ✅ Always allow login page
+  if (pathname.startsWith("/login")) {
     return NextResponse.next();
   }
 
   // Read role cookie
   const userRole = request.cookies.get("userRole")?.value;
 
-  // Not logged in → redirect
+  // ❌ Not logged in → redirect to login
   if (!userRole) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
@@ -46,7 +44,7 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next|favicon.ico).*)"],
 };
 
 // import { NextResponse } from "next/server";
