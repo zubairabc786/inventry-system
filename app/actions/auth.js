@@ -53,11 +53,19 @@ export async function login(prevState, formData) {
   await session.save();
 
   // Also store role in a cookie for client-side access
+  // cookies().set("userRole", user.role, {
+  //   httpOnly: false, // Make accessible to JavaScript
+  //   secure: process.env.NODE_ENV === "production",
+  //   sameSite: "lax",
+  //   maxAge: 60 * 60 * 24 * 7, // 1 week
+  // });
+
   cookies().set("userRole", user.role, {
-    httpOnly: false, // Make accessible to JavaScript
-    secure: process.env.NODE_ENV === "production",
+    httpOnly: false,
+    secure: true, // REQUIRED on Vercel
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 1 week
+    path: "/", // VERY IMPORTANT
+    maxAge: 60 * 60 * 24 * 7,
   });
 
   return { ok: true, error: null };
@@ -66,7 +74,9 @@ export async function login(prevState, formData) {
 export async function logout() {
   const session = await getSession();
   session.destroy();
-  cookies().delete("userRole");
+  // cookies().delete("userRole");
+  cookies().delete("userRole", { path: "/" });
+
   return { ok: true };
 }
 

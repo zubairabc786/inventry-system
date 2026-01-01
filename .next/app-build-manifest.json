@@ -16,25 +16,10 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/(inventory)/purchase-detail/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/purchase-detail/page.js"
-    ],
-    "/(inventory)/products/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/products/page.js"
-    ],
     "/(inventory)/sale-sheet/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(inventory)/sale-sheet/page.js"
-    ],
-    "/(inventory)/purchase-sheet/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(inventory)/purchase-sheet/page.js"
     ]
   }
 }

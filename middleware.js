@@ -1,3 +1,54 @@
+// "use server";
+
+import { NextResponse } from "next/server";
+
+export function middleware(request) {
+  const { pathname } = request.nextUrl;
+
+  // Allow login page ALWAYS
+  if (pathname === "/login") {
+    return NextResponse.next();
+  }
+
+  // Read role cookie
+  const userRole = request.cookies.get("userRole")?.value;
+
+  // Not logged in → redirect
+  if (!userRole) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  // Admin-only routes
+  const adminRoutes = [
+    "/products",
+    "/purchase-sheet",
+    "/purchase-detail",
+    "/purchase-return",
+    "/purchase-return-detail",
+    "/coa",
+    "/categories",
+    "/jornal-jv-form",
+    "/ledger-entries",
+    "/trial-balance",
+    "/balance-sheet",
+    "/profit-and-loss",
+  ];
+
+  const isAdminRoute = adminRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
+  );
+
+  if (isAdminRoute && userRole !== "admin") {
+    return NextResponse.redirect(new URL("/dashboard-inventry", request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+
 // import { NextResponse } from "next/server";
 // import { getSession } from "./app/lib/session";
 
@@ -53,47 +104,47 @@
 //   ],
 // };
 
-import { NextResponse } from "next/server";
+// import { NextResponse } from "next/server";
 
-export function middleware(request) {
-  const { pathname } = request.nextUrl;
+// export function middleware(request) {
+//   const { pathname } = request.nextUrl;
 
-  // Read role from cookie (Edge-safe)
-  const userRole = request.cookies.get("userRole")?.value;
+//   // Read role from cookie (Edge-safe)
+//   const userRole = request.cookies.get("userRole")?.value;
 
-  // If not logged in and not on login page
-  if (!userRole && pathname !== "/login") {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+//   // If not logged in and not on login page
+//   if (!userRole && pathname !== "/login") {
+//     return NextResponse.redirect(new URL("/login", request.url));
+//   }
 
-  // Admin-only routes
-  const adminRoutes = [
-    "/products",
-    "/purchase-sheet",
-    "/purchase-detail",
-    "/purchase-return",
-    "/purchase-return-detail",
-    "/coa",
-    "/categories",
-    "/jornal-jv-form",
-    "/ledger-entries",
-    "/trial-balance",
-    "/balance-sheet",
-    "/profit-and-loss",
-  ];
+//   // Admin-only routes
+//   const adminRoutes = [
+//     "/products",
+//     "/purchase-sheet",
+//     "/purchase-detail",
+//     "/purchase-return",
+//     "/purchase-return-detail",
+//     "/coa",
+//     "/categories",
+//     "/jornal-jv-form",
+//     "/ledger-entries",
+//     "/trial-balance",
+//     "/balance-sheet",
+//     "/profit-and-loss",
+//   ];
 
-  const isAdminRoute = adminRoutes.some(
-    (route) => pathname === route || pathname.startsWith(route + "/")
-  );
+//   const isAdminRoute = adminRoutes.some(
+//     (route) => pathname === route || pathname.startsWith(route + "/")
+//   );
 
-  // Block non-admin users
-  if (isAdminRoute && userRole !== "admin") {
-    return NextResponse.redirect(new URL("/dashboard-inventry", request.url));
-  }
+//   // Block non-admin users
+//   if (isAdminRoute && userRole !== "admin") {
+//     return NextResponse.redirect(new URL("/dashboard-inventry", request.url));
+//   }
 
-  return NextResponse.next();
-}
+//   return NextResponse.next();
+// }
 
-export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login).*)"],
-};
+// export const config = {
+//   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|login).*)"],
+// };
